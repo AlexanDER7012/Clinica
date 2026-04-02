@@ -2,7 +2,12 @@ import prisma from '../config/prisma.js';
 
 const getDoctores = async (req, res) => {
     try{
-        const doctores = await prisma.doctor.findMany();
+        const doctores = await prisma.doctor.findMany({
+            include: {
+                especialidad: true, 
+                sede: true
+            }
+        });
         res.json(doctores);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -14,6 +19,11 @@ const getDoctorById = async (req, res) => {
         const {id} = req.params;
         const doctor = await prisma.doctor.findUnique({
             where: { id_doctor:parseInt(id)},
+            include: {
+                especialidad: true,
+                sede: true,
+                citas: true
+            }
         });
         if(!doctor){
             return res.status(404).json({error: 'Doctor no encontrado'});
@@ -26,9 +36,16 @@ const getDoctorById = async (req, res) => {
 
 const createDoctor = async (req, res) =>{
     try{
-        const data = req.body;
+        const { nombres, telefono, email, especialidadId, sedeId } = req.body;
         const doctorNuevo = await prisma.doctor.create({
-            data,
+            data: {
+                nombres,
+                telefono,
+                email,
+                especialidadId : parseInt(especialidadId),
+                sedeId : parseInt(sedeId)
+            },  
+            include: { especialidad: true, sede: true }
         });
         res.status(201).json(doctorNuevo);
     } catch(error){
@@ -39,10 +56,17 @@ const createDoctor = async (req, res) =>{
 const updateDoctor = async (req, res) => {
     try{
         const {id} = req.params;
-        const data = req.body;
+        const { nombres, telefono, email, especialidadId, sedeId } = req.body;
         const doctorActualizado = await prisma.doctor.update({
             where: { id_doctor: parseInt(id)},
-            data,
+            data: {
+                nombres,
+                telefono,
+                email,
+                especialidadId: especialidadId ? parseInt(especialidadId) : undefined,
+                sedeId: sedeId ? parseInt(sedeId) : undefined
+            },
+            include: { especialidad: true, sede: true }
         });
         res.json(doctorActualizado);
     }catch(error){

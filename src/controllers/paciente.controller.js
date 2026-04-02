@@ -29,10 +29,20 @@ const getPacienteById = async (req, res) =>{
 };
 
 const createPaciente = async (req, res) => {
-    const data = req.body;
+    const { nombres, apellidos, dpi, telefono, email, fecha_nacimiento, direccion, usuarioId } = req.body;
     try{
         const pacienteNuevo = await prisma.paciente.create({
-            data,
+            data: {
+                nombres,
+                apellidos,
+                dpi,
+                sexo, 
+                telefono,
+                email,
+                direccion,
+                contacto_emergencia,
+                fecha_nacimiento: new Date(fecha_nacimiento) 
+            },
         });
     res.status(201).json(pacienteNuevo);
 
@@ -45,11 +55,24 @@ const updatePaciente = async (req, res) => {
     try{
 
         const {id} = req.params;
-        const data = req.body;
+        const { 
+            nombres, apellidos, dpi, sexo, telefono, 
+            email, direccion, contacto_emergencia, fecha_nacimiento 
+        } = req.body;
 
         const pacienteActualizado = await prisma.paciente.update({
             where: {id_paciente: parseInt(id)},
-            data,
+           data: {
+                nombres,
+                apellidos,
+                dpi,
+                sexo,
+                telefono,
+                email,
+                direccion,
+                contacto_emergencia,
+                fecha_nacimiento: fecha_nacimiento ? new Date(fecha_nacimiento) : undefined
+            },
         });
         res.json(pacienteActualizado);
     }catch(error){
