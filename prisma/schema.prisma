@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+
+}
+
+model Usuario {
+  id_usuario Int    @id @default(autoincrement())
+  nombres    String
+  email      String @unique
+  password   String
+  rol        Rol
+  sedeId     Int
+  sede       Sede   @relation(fields: [sedeId], references: [id_sede])
+}
+
+model Sede {
+  id_sede   Int       @id @default(autoincrement())
+  nombre    String
+  direccion String
+  telefono  String?
+  email     String?
+  doctores  Doctor[]
+  usuarios  Usuario[]
+}
+
+model Especialidad {
+  id_especialidad Int      @id @default(autoincrement())
+  nombre          String   @unique
+  descripcion     String?
+  doctores        Doctor[]
+}
+
+model Doctor {
+  id_doctor      Int          @id @default(autoincrement())
+  nombres        String
+  telefono       String?
+  email          String?
+  especialidadId Int
+  sedeId         Int
+  citas          Cita[]
+  especialidad   Especialidad @relation(fields: [especialidadId], references: [id_especialidad])
+  sede           Sede         @relation(fields: [sedeId], references: [id_sede])
+}
+
+model Paciente {
+  id_paciente         Int      @id @default(autoincrement())
+  nombres             String
+  apellidos           String
+  dpi                 String   @unique
+  sexo                Sexo
+  telefono            String
+  email               String
+  direccion           String
+  contacto_emergencia String?
+  fecha_nacimiento    DateTime
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  citas               Cita[]
+}
+
+model Cita {
+  id_cita    Int        @id @default(autoincrement())
+  fecha      DateTime
+  motivo     String?
+  estado     EstadoCita @default(PENDIENTE)
+  pacienteId Int
+  doctorId   Int
+  createdAt  DateTime   @default(now())
+  doctor     Doctor     @relation(fields: [doctorId], references: [id_doctor])
+  paciente   Paciente   @relation(fields: [pacienteId], references: [id_paciente])
+}
+
+enum Rol {
+  ADMIN
+  SECRETARIA
+}
+
+enum Sexo {
+  MASCULINO
+  FEMENINO
+}
+
+enum EstadoCita {
+  PENDIENTE
+  CONFIRMADA
+  CANCELADA
+}
