@@ -1,9 +1,13 @@
 import express from "express";
 import cors from "cors";
 const app = express();
+
 import pacientes from "./routes/paciente.routes.js";
 import doctores from "./routes/doctor.routes.js";
 import sedes from "./routes/sede.routes.js";
+import especialidades from "./routes/especialidad.routes.js";
+import usuarios from "./routes/usuario.routes.js";
+
 const configCors = {
     origin:"http://localhost:3000"
 };
@@ -19,4 +23,6 @@ app.get("/", (req, res) => {
 app.use("/pacientes", pacientes);
 app.use("/doctores", doctores);
 app.use("/sedes", sedes);
+app.use("/especialidades", especialidades);
+app.use("/usuarios", usuarios);
 export default app;
