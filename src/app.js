@@ -7,7 +7,7 @@ import doctores from "./routes/doctor.routes.js";
 import sedes from "./routes/sede.routes.js";
 import especialidades from "./routes/especialidad.routes.js";
 import usuarios from "./routes/usuario.routes.js";
-
+import citas from "./routes/cita.routes.js";
 const configCors = {
     origin:"http://localhost:3000"
 };
@@ -25,4 +25,5 @@ app.use("/doctores", doctores);
 app.use("/sedes", sedes);
 app.use("/especialidades", especialidades);
 app.use("/usuarios", usuarios);
+app.use("/citas",citas);
 export default app;
