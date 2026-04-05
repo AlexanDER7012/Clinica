@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "cross-env TZ='America/Guatemala' nodemon src/server.js",
+    "start": "cross-env TZ='America/Guatemala' node src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

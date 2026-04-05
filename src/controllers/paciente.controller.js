@@ -29,14 +29,24 @@ const getPacienteById = async (req, res) =>{
 };
 
 const createPaciente = async (req, res) => {
-    const { nombres, apellidos, dpi, telefono, email, fecha_nacimiento, direccion, usuarioId } = req.body;
+    const { 
+        nombres, 
+        apellidos, 
+        dpi, 
+        sexo, 
+        telefono, 
+        email, 
+        fecha_nacimiento, 
+        direccion, 
+        contacto_emergencia 
+    } = req.body;
     try{
         const pacienteNuevo = await prisma.paciente.create({
             data: {
                 nombres,
                 apellidos,
                 dpi,
-                sexo, 
+                sexo,
                 telefono,
                 email,
                 direccion,

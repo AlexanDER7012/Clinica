@@ -58,7 +58,7 @@ const updateEspecialidad = async (req, res) => {
     }
 };
 
-export const deleteEspecialidad = async (req, res) => {
+const deleteEspecialidad = async (req, res) => {
     try {
         const { id } = req.params;
         await prisma.especialidad.delete({

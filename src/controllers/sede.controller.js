@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
 
-export const getSedes = async (req, res) => {
+const getSedes = async (req, res) => {
     try {
         const sedes = await prisma.sede.findMany({
             include: {
@@ -17,7 +17,7 @@ export const getSedes = async (req, res) => {
 };
 
 
-export const getSedeById = async (req, res) => {
+const getSedeById = async (req, res) => {
     try{
         const{id} = req.params;
         const sede = await prisma.sede.findUnique({
@@ -36,7 +36,7 @@ export const getSedeById = async (req, res) => {
     }
 };
 
-export const createSede = async (req, res) => {
+const createSede = async (req, res) => {
     try {
         const { nombre, direccion, telefono, email } = req.body;
         
@@ -54,7 +54,7 @@ export const createSede = async (req, res) => {
     }
 };
 
-export const updateSede = async (req, res) => {
+const updateSede = async (req, res) => {
     try{
         const { id } = req.params;
         const { nombre, direccion, telefono, email } = req.body;
@@ -73,7 +73,7 @@ export const updateSede = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-export const deleteSede = async (req, res) => {
+const deleteSede = async (req, res) => {
     try{
         const {id} = req.params;
         
