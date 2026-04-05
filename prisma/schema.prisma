@@ -13,8 +13,8 @@ model Usuario {
   email      String @unique
   password   String
   rol        Rol
-  sedeId     Int
-  sede       Sede   @relation(fields: [sedeId], references: [id_sede])
+  sedeId     Int?
+  sede       Sede?   @relation(fields: [sedeId], references: [id_sede])
 }
 
 model Sede {
