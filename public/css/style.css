@@ -1,0 +1,91 @@
+/* Mantenemos tu base pero limpiamos lo innecesario */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Open Sans', sans-serif; background-color: #ecf0f1; }
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.content {
+    background-color: #fff;
+    border-radius: 15px;
+    width: 960px;
+    height: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1);
+}
+
+.content::before {
+    content: "";
+    position: absolute;
+    background-color: #58af9b;
+    width: 40%;
+    height: 100%;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    left: 0;
+    z-index: 10;
+}
+
+.title { font-size: 28px; font-weight: bold; }
+.title-primary { color: #fff; margin-bottom: 10px; }
+.title-second { color: #58af9b; margin-bottom: 15px; }
+
+.description { font-size: 14px; font-weight: 300; line-height: 20px; }
+.description-primary { color: #fff; }
+.description-second { color: #7f8c8d; margin-bottom: 10px; }
+
+.btn {
+    border-radius: 20px;
+    text-transform: uppercase;
+    color: #fff;
+    font-size: 11px;
+    padding: 10px 40px;
+    cursor: pointer;
+    font-weight: bold;
+    border: none;
+    margin-top: 1.5rem;
+    transition: 0.3s;
+}
+
+.btn-primary { background-color: transparent; border: 1px solid #fff; }
+.btn-primary:hover { background-color: #fff; color: #58af9b; }
+
+.btn-second { background-color: #58af9b; }
+.btn-second:hover { background-color: #4a9382; }
+
+.first-column { text-align: center; width: 40%; z-index: 11; padding: 20px; }
+.second-column { width: 60%; display: flex; flex-direction: column; align-items: center; z-index: 11; }
+
+.form { display: flex; flex-direction: column; width: 60%; }
+.label-input {
+    background-color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    padding: 0 10px;
+    border-radius: 5px;
+}
+.form input { height: 45px; width: 100%; border: none; background: transparent; padding-left: 10px; outline: none; }
+.icon-modify { color: #7f8c8d; }
+
+.sign-in-js .content::before {
+    left: 60%;
+    border-radius: 0 15px 15px 0;
+    animation: slidein 0.6s forwards;
+}
+@keyframes slidein { from { left: 0; } to { left: 60%; } }
+
+
+.second-content { position: absolute; opacity: 1; z-index: 10; }
+.first-content { position: absolute; opacity: 0; z-index: 9; }
+
+.sign-in-js .second-content { opacity: 0; z-index: 9; }
+.sign-in-js .first-content { opacity: 1; z-index: 10; }

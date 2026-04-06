@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Proyecto 1 - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content first-content">
+            <div class="first-column">
+                <h2 class="title title-primary">¡Bienvenido!</h2>
+                <p class="description description-primary">Clínica Proyecto 1</p>
+                <p class="description description-primary">Ingresa tus datos para loguearte,</p>
+                <p class="description description-primary">o si quieres agendar una cita clic acá</p>
+                <button id="signin" class="btn btn-primary">Ir al Login</button>
+            </div>
+            <div class="second-column">
+                <h2 class="title title-second">Portal Pacientes</h2>
+                <p class="description description-second">Próximamente registro de pacientes:</p>
+                <form class="form" id="signupForm">
+                    <label class="label-input">
+                        <i class="far fa-envelope icon-modify"></i>
+                        <input type="email" id="signupEmail" placeholder="Email" required>
+                    </label>
+                    <label class="label-input">
+                        <i class="fas fa-lock icon-modify"></i>
+                        <input type="password" id="signupPassword" placeholder="Password" required>
+                    </label>
+                    <button type="submit" class="btn btn-second">Registrar</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="content second-content">
+            <div class="first-column">
+                <h2 class="title title-primary">¿Nuevo aquí?</h2>
+                <p class="description description-primary">Gestión de citas y expedientes</p>
+                <button id="signup" class="btn btn-primary">Portal Paciente</button>
+            </div>
+            <div class="second-column">
+                <h2 class="title title-second">Iniciar Sesión</h2>
+                <p class="description description-second">Usa tu cuenta de empleado:</p>
+                <form class="form" id="loginForm">
+                    <label class="label-input">
+                        <i class="far fa-envelope icon-modify"></i>
+                        <input type="email" id="loginEmail" placeholder="Email" required>
+                    </label>
+                    <label class="label-input">
+                        <i class="fas fa-lock icon-modify"></i>
+                        <input type="password" id="loginPassword" placeholder="Password" required>
+                    </label>
+                    <a class="password" href="#">¿Olvidaste tu contraseña?</a>
+                    <button type="submit" class="btn btn-second">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script> <script src="js/auth.js"></script> </body>
+</html>

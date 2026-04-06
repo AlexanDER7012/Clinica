@@ -27,7 +27,29 @@ const getPacienteById = async (req, res) =>{
     }
 
 };
+const getPacienteByDpi = async (req, res) => {
+try{
+    const { dpi } = req.params;
+    const paciente = await prisma.paciente.findUnique({
+    where: {dpi},
+        include: {
+        citas: {
+        include: {
+            doctor: {
+              select: { nombres: true, especialidad: true } // Para saber quién lo atendió
+            }
+        }
+        }
+    }
+    });
 
+    if(!paciente) return res.status(404).json({ mensaje: "Paciente no encontrado" });
+    
+    res.json(paciente);
+}catch (error){
+    res.status(500).json({ error: error.message });
+}
+};
 const createPaciente = async (req, res) => {
     const { 
         nombres, 

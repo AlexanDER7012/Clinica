@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Clínica Proyecto 1</title>
+    
+    <script src="js/protected.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            padding: 50px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 { color: #58af9b; margin-bottom: 20px; }
+        .user-info { margin: 25px 0; padding: 20px; border-top: 1px solid #eee; }
+        .logout-btn {
+            padding: 12px 35px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .logout-btn:hover { background-color: #c0392b; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <h1>Clínica Proyecto 1</h1>
+        <div class="user-info">
+            <h3>Bienvenido, <span id="userName">Cargando...</span>! 👋</h3>
+            <p id="userEmail" style="color: #666; margin-top: 10px;"></p>
+            <p id="userRol" style="font-weight: bold; color: #58af9b; margin-top: 5px;"></p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

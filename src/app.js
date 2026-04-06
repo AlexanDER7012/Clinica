@@ -10,7 +10,7 @@ import usuarios from "./routes/usuario.routes.js";
 import citas from "./routes/cita.routes.js";
 import auth from "./routes/auth.routes.js";
 const configCors = {
-    origin:"http://localhost:3000"
+    origin:"http://127.0.0.1:5500"
 };
 app.use(cors(configCors));
 app.use(express.json());
