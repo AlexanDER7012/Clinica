@@ -6,43 +6,31 @@
     <title>Clínica Proyecto 1 - Login</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <style>
+        .content.second-content {
+            display: flex !important;
+            position: relative !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+        .first-content { display: none; } 
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="content first-content">
-            <div class="first-column">
-                <h2 class="title title-primary">¡Bienvenido!</h2>
-                <p class="description description-primary">Clínica Proyecto 1</p>
-                <p class="description description-primary">Ingresa tus datos para loguearte,</p>
-                <p class="description description-primary">o si quieres agendar una cita clic acá</p>
-                <button id="signin" class="btn btn-primary">Ir al Login</button>
-            </div>
-            <div class="second-column">
-                <h2 class="title title-second">Portal Pacientes</h2>
-                <p class="description description-second">Próximamente registro de pacientes:</p>
-                <form class="form" id="signupForm">
-                    <label class="label-input">
-                        <i class="far fa-envelope icon-modify"></i>
-                        <input type="email" id="signupEmail" placeholder="Email" required>
-                    </label>
-                    <label class="label-input">
-                        <i class="fas fa-lock icon-modify"></i>
-                        <input type="password" id="signupPassword" placeholder="Password" required>
-                    </label>
-                    <button type="submit" class="btn btn-second">Registrar</button>
-                </form>
-            </div>
-        </div>
-
         <div class="content second-content">
             <div class="first-column">
-                <h2 class="title title-primary">¿Nuevo aquí?</h2>
-                <p class="description description-primary">Gestión de citas y expedientes</p>
-                <button id="signup" class="btn btn-primary">Portal Paciente</button>
+                <h2 class="title title-primary">¿Eres Paciente?</h2>
+                <p class="description description-primary">Gestiona tus citas de forma rápida</p>
+                <p class="description description-primary">en nuestras sedes de Antigua o Petén.</p>
+                <a href="portal.html" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+                    Agendar Cita
+                </a>
             </div>
+            
             <div class="second-column">
                 <h2 class="title title-second">Iniciar Sesión</h2>
-                <p class="description description-second">Usa tu cuenta de empleado:</p>
+                <p class="description description-second">Acceso para personal médico y administrativo:</p>
                 <form class="form" id="loginForm">
                     <label class="label-input">
                         <i class="far fa-envelope icon-modify"></i>
@@ -53,11 +41,12 @@
                         <input type="password" id="loginPassword" placeholder="Password" required>
                     </label>
                     <a class="password" href="#">¿Olvidaste tu contraseña?</a>
-                    <button type="submit" class="btn btn-second">Entrar</button>
+                    <button type="submit" class="btn btn-second">Entrar al Sistema</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <script src="js/app.js"></script> <script src="js/auth.js"></script> </body>
+    <script src="js/auth.js"></script> 
+</body>
 </html>

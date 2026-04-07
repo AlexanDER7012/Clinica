@@ -1,0 +1,122 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Open Sans', sans-serif;
+    overflow: hidden; 
+}
+
+.split-container {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    background-color: #000; 
+}
+
+
+.split {
+    flex: 1; 
+    position: relative;
+    overflow: hidden;
+    text-decoration: none; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: flex 0.7s cubic-bezier(0.4, 0, 0.2, 1), all 0.5s ease;
+}
+
+.split::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(4px) brightness(0.6);
+    transition: all 0.6s ease-in-out;
+    z-index: 1; 
+}
+
+.left::before {
+    background-image: url('../img/antigua.jpg'); 
+}
+
+.right::before {
+    background-image: url('../img/peten.jpg'); 
+}
+
+.split::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    transition: background-color 0.5s ease;
+}
+
+.centered {
+    position: relative;
+    z-index: 3; 
+    text-align: center;
+    color: white;
+    transition: all 0.5s ease-in-out;
+}
+
+.sede-title {
+    font-size: 3rem;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 10px rgba(0,0,0,0.7);
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.btn-select {
+    display: inline-block;
+    padding: 12px 35px;
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+
+.split:hover {
+    flex: 1.6; 
+}
+
+
+.split:hover::before {
+    transform: scale(1.1); 
+    filter: blur(0px) brightness(0.8); 
+}
+
+.split:hover::after {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-select:hover {
+    background-color: white;
+    color: #1a2a6c; 
+    box-shadow: 0 0 20px rgba(255,255,255,0.4);
+}
+
+.split:hover .sede-title {
+    transform: scale(1.05);
+}
+
+.left {
+    border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+@media (max-width: 768px) {
+    .split-container {
+        flex-direction: column;
+    }
+    .split:hover {
+        flex: 2;
+    }
+}
