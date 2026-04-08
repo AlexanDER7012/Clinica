@@ -37,11 +37,11 @@ body, html {
 }
 
 .left::before {
-    background-image: url('../img/antigua.jpg'); 
+    background-image: url('../img/Antigua.jpg'); 
 }
 
 .right::before {
-    background-image: url('../img/peten.jpg'); 
+    background-image: url('../img/Peten.jpg'); 
 }
 
 .split::after {
