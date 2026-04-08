@@ -3,6 +3,9 @@ import prisma from "../config/prisma.js";
 const getEspecialidades = async (req, res) => {
     try{
         const especialidades = await prisma.especialidad.findMany({
+            where: {
+                estado: true
+            },
             include: {
                 _count: {
                     select: {doctores: true}
@@ -24,7 +27,7 @@ const getEspecialidadById = async (req, res) => {
             include: { doctores: true}
         });
         if(!especialidad){
-            res.status(404).json({error: 'Especialidad no encontrada'});
+            return res.status(404).json({error: 'Especialidad no encontrada'});
         }
         res.json(especialidad);
     }catch(error){
@@ -47,10 +50,14 @@ const createEspecialidad = async (req, res) => {
 const updateEspecialidad = async (req, res) => {
     try{
         const { id } = req.params;
-        const {nombre, descripcion } = req.body;
+        const {nombre, descripcion, estado } = req.body;
         const actualizada = await prisma.especialidad.update({
             where: { id_especialidad: parseInt(id) },
-            data: { nombre, descripcion }
+            data: { 
+                nombre, 
+                descripcion,
+                estado: estado !== undefined ? estado : undefined
+            }
         });
         res.json(actualizada);
     }catch (error) {
@@ -61,12 +68,15 @@ const updateEspecialidad = async (req, res) => {
 const deleteEspecialidad = async (req, res) => {
     try {
         const { id } = req.params;
-        await prisma.especialidad.delete({
-            where: {id_especialidad: parseInt(id) }
+        
+        await prisma.especialidad.update({
+            where: {id_especialidad: parseInt(id) },
+            data: { estado: false }
         });
-        res.json({ message: "Especialidad eliminada correctamente" });
+        
+        res.json({ message: "Especialidad desactivada correctamente" });
     } catch (error) {
-        res.status(500).json({ error: "No se puede eliminar si hay doctores asociados a esta especialidad." });
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -77,4 +87,3 @@ export {
     updateEspecialidad,
     deleteEspecialidad
 }
-

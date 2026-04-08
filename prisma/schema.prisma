@@ -13,6 +13,7 @@ model Usuario {
   email      String @unique
   password   String
   rol        Rol
+  estado     Boolean  @default(true)
   sedeId     Int?
   sede       Sede?   @relation(fields: [sedeId], references: [id_sede])
 }
@@ -23,22 +24,27 @@ model Sede {
   direccion String
   telefono  String?
   email     String?
+  estado    Boolean  @default(true)
   doctores  Doctor[]
   usuarios  Usuario[]
+  citas     Cita[]
 }
 
 model Especialidad {
   id_especialidad Int      @id @default(autoincrement())
   nombre          String   @unique
   descripcion     String?
+  estado          Boolean  @default(true)
   doctores        Doctor[]
 }
 
 model Doctor {
   id_doctor      Int          @id @default(autoincrement())
   nombres        String
+  dpi            String        @unique
   telefono       String?
   email          String?
+  estado         Boolean  @default(true)
   especialidadId Int
   sedeId         Int
   citas          Cita[]
@@ -69,6 +75,8 @@ model Cita {
   estado     EstadoCita @default(PENDIENTE)
   pacienteId Int
   doctorId   Int
+  sedeId     Int        
+  sede       Sede       @relation(fields: [sedeId], references: [id_sede])
   createdAt  DateTime   @default(now())
   doctor     Doctor     @relation(fields: [doctorId], references: [id_doctor])
   paciente   Paciente   @relation(fields: [pacienteId], references: [id_paciente])

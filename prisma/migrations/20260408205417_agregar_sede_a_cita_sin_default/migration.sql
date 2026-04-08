@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Cita" ALTER COLUMN "sedeId" DROP DEFAULT;

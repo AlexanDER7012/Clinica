@@ -2,7 +2,12 @@ import prisma from '../config/prisma.js';
 
 const getDoctores = async (req, res) => {
     try{
+        const { sedeId } = req.query;
         const doctores = await prisma.doctor.findMany({
+            where: {
+                estado: true,
+                ...(sedeId && { sedeId: parseInt(sedeId)})
+            },
             include: {
                 especialidad: true, 
                 sede: true
@@ -36,10 +41,11 @@ const getDoctorById = async (req, res) => {
 
 const createDoctor = async (req, res) =>{
     try{
-        const { nombres, telefono, email, especialidadId, sedeId } = req.body;
+        const { nombres, dpi, telefono, email, especialidadId, sedeId } = req.body;
         const doctorNuevo = await prisma.doctor.create({
             data: {
                 nombres,
+                dpi,
                 telefono,
                 email,
                 especialidadId : parseInt(especialidadId),
@@ -56,15 +62,17 @@ const createDoctor = async (req, res) =>{
 const updateDoctor = async (req, res) => {
     try{
         const {id} = req.params;
-        const { nombres, telefono, email, especialidadId, sedeId } = req.body;
+        const { nombres, dpi, telefono, email, especialidadId, sedeId, estado } = req.body;
         const doctorActualizado = await prisma.doctor.update({
             where: { id_doctor: parseInt(id)},
             data: {
                 nombres,
+                dpi,
                 telefono,
                 email,
                 especialidadId: especialidadId ? parseInt(especialidadId) : undefined,
-                sedeId: sedeId ? parseInt(sedeId) : undefined
+                sedeId: sedeId ? parseInt(sedeId) : undefined,
+                estado: estado !== undefined ? estado : undefined
             },
             include: { especialidad: true, sede: true }
         });
@@ -78,11 +86,12 @@ const deleteDoctor = async (req, res) =>{
     try{
         const {id} = req.params;
 
-        const doctorEliminado = await prisma.doctor.delete({
+        const doctorDesactivado = await prisma.doctor.update({
             where: {id_doctor: parseInt(id)},
+            data: { estado: false }
         });
 
-        res.json({ message: "Doctor eliminado correctamente"});
+        res.json({ message: "Doctor desactivado correctamente"});
 
     }catch(error){
         res.status(500).json({error: error.message});

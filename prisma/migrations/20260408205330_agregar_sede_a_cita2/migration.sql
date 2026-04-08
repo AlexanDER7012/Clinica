@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Cita" ADD COLUMN     "sedeId" INTEGER NOT NULL DEFAULT 1;
+
+-- AddForeignKey
+ALTER TABLE "Cita" ADD CONSTRAINT "Cita_sedeId_fkey" FOREIGN KEY ("sedeId") REFERENCES "Sede"("id_sede") ON DELETE RESTRICT ON UPDATE CASCADE;

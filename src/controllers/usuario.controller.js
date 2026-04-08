@@ -3,8 +3,12 @@ import prisma from "../config/prisma.js";
 const getUsuarios = async (req, res) => {
     try{
         const usuarios = await prisma.usuario.findMany({
+            where: {
+                estado: true
+            },
             include: {
-                sede: { select: { nombre: true}}             }
+                sede: { select: { nombre: true} }             
+            }
         });
         res.json(usuarios);
     }catch (error){
@@ -52,7 +56,7 @@ const createUsuario = async (req, res) =>{
 const updateUsuario = async (req, res) =>{
     try {
         const {id} = req.params;
-        const {nombres, email, password, rol, sedeId } = req.body;
+        const {nombres, email, password, rol, sedeId, estado } = req.body;
 
         const actualizado = await prisma.usuario.update({
             where: { id_usuario: parseInt(id) },
@@ -61,7 +65,8 @@ const updateUsuario = async (req, res) =>{
                 email,
                 password,
                 rol,
-                sedeId: sedeId ? parseInt(sedeId) : undefined
+                sedeId: sedeId ? parseInt(sedeId) : undefined,
+                estado: estado !== undefined ? estado : undefined
             }
         });
         res.json(actualizado);
@@ -69,15 +74,22 @@ const updateUsuario = async (req, res) =>{
         res.status(500).json({ error: error.message });
     }
 };
+
 const deleteUsuario = async (req, res) => {
     try {
         const {id} = req.params;
-        await prisma.usuario.delete({ where: { id_usuario: parseInt(id) } });
-        res.json({ message: "Usuario eliminado correctamente" });
+
+        await prisma.usuario.update({ 
+            where: { id_usuario: parseInt(id) },
+            data: { estado: false }
+        });
+
+        res.json({ message: "Usuario desactivado correctamente" });
     }catch (error){
         res.status(500).json({ error: error.message });
     }
 };
+
     export{
         getUsuarios,
         getUsuarioById,

@@ -1,6 +1,104 @@
 import prisma from '../config/prisma.js';
 
+const registrarCitaCompleta = async (req, res) => {
+    const { paciente, cita, sedeId } = req.body;
 
+    try {
+        const fechaConZona = cita.fecha.includes('Z') || cita.fecha.includes('-') 
+            ? cita.fecha 
+            : `${cita.fecha}-06:00`;
+
+        const fechaCita = new Date(fechaConZona);
+        
+        const inicioRango = new Date(fechaCita.getTime() - 30 * 60000);
+        const finRango = new Date(fechaCita.getTime() + 30 * 60000);
+
+        const formatearHora = (fecha) => new Intl.DateTimeFormat('es-GT', {
+            hour: '2-digit', 
+            minute: '2-digit', 
+            hour12: true, 
+            timeZone: 'America/Guatemala'
+        }).format(fecha);
+
+        const choqueDoctor = await prisma.cita.findFirst({
+            where: {
+                doctorId: parseInt(cita.doctorId),
+                fecha: { gt: inicioRango, lt: finRango }
+            },
+            include: { doctor: true }
+        });
+
+        if (choqueDoctor) {
+            return res.status(400).json({
+                error: `El Dr. ${choqueDoctor.doctor.nombres} ya tiene una cita a las ${formatearHora(choqueDoctor.fecha)}.`
+            });
+        }
+        const pacienteExistente = await prisma.paciente.findUnique({ 
+            where: { dpi: paciente.dpi } 
+        });
+        
+        if (pacienteExistente) {
+            const choquePaciente = await prisma.cita.findFirst({
+                where: {
+                    pacienteId: pacienteExistente.id_paciente,
+                    fecha: { gt: inicioRango, lt: finRango }
+                },
+                include: { paciente: true }
+            });
+
+            if (choquePaciente) {
+                return res.status(400).json({
+                    error: `El paciente ${choquePaciente.paciente.nombres} ya tiene otra cita a las ${formatearHora(choquePaciente.fecha)}.`
+                });
+            }
+        }
+        const resultado = await prisma.$transaction(async (tx) => {
+            
+            const pacienteDB = await tx.paciente.upsert({
+                where: { dpi: paciente.dpi },
+                update: {
+                    nombres: paciente.nombres,
+                    apellidos: paciente.apellidos,
+                    telefono: paciente.telefono,
+                    email: paciente.email,
+                    direccion: paciente.direccion,
+                    contacto_emergencia: paciente.contacto_emergencia,
+                    fecha_nacimiento: new Date(paciente.fecha_nacimiento)
+                },
+                create: { 
+                    ...paciente, 
+                    fecha_nacimiento: new Date(paciente.fecha_nacimiento) 
+                }
+            });
+            const nuevaCita = await tx.cita.create({
+                data: {
+                    fecha: fechaCita,
+                    motivo: cita.motivo,
+                    pacienteId: pacienteDB.id_paciente,
+                    doctorId: parseInt(cita.doctorId),
+                    sedeId: parseInt(sedeId),
+                    estado: 'PENDIENTE'
+                },
+                include: {
+                    paciente: true,
+                    doctor: true,
+                    sede: true
+                }
+            });
+
+            return nuevaCita;
+        });
+
+        res.status(201).json(resultado);
+
+    } catch(error){
+        console.error("Error en registrarCitaCompleta:", error);
+        res.status(500).json({ 
+            error: "Error interno del servidor", 
+            detalle: error.message 
+        });
+    }
+};
 const getCitas = async (req, res) => {
     try{
         const { doctorId, pacienteId } = req.query;
@@ -25,6 +123,7 @@ const getCitas = async (req, res) => {
                 paciente: `${cita.paciente.nombres} ${cita.paciente.apellidos}`,
                 doctor: cita.doctor.nombres,
                 motivo: cita.motivo,
+                estado: cita.estado,
 
                 fecha_iso: cita.fecha, 
 
@@ -182,5 +281,6 @@ export{
     getCitaById,
     createCita,
     updateCita,
-    deleteCita
+    deleteCita,
+    registrarCitaCompleta
 }

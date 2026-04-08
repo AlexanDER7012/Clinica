@@ -4,9 +4,12 @@ import prisma from '../config/prisma.js';
 const getSedes = async (req, res) => {
     try {
         const sedes = await prisma.sede.findMany({
+            where: {
+                estado: true
+            },
             include: {
                 _count: {
-                    select: { doctores: true, usuarios: true } // Nos dice cuántos hay de cada uno
+                    select: { doctores: true, usuarios:true} 
                 }
             }
         });
@@ -57,7 +60,7 @@ const createSede = async (req, res) => {
 const updateSede = async (req, res) => {
     try{
         const { id } = req.params;
-        const { nombre, direccion, telefono, email } = req.body;
+        const { nombre, direccion, telefono, email, estado } = req.body;
 
         const sedeActualizada = await prisma.sede.update({
             where:{ id_sede: parseInt(id) },
@@ -65,7 +68,8 @@ const updateSede = async (req, res) => {
                 nombre,
                 direccion,
                 telefono,
-                email
+                email,
+                estado: estado !== undefined ? estado : undefined
             }
         });
         res.json(sedeActualizada);
@@ -77,14 +81,15 @@ const deleteSede = async (req, res) => {
     try{
         const {id} = req.params;
         
-        await prisma.sede.delete({
-            where: { id_sede: parseInt(id) }
+        await prisma.sede.update({
+            where: { id_sede: parseInt(id) },
+            data: { estado: false }
         });
 
-        res.json({message: "Sede eliminada correctamente" });
+        res.json({message: "Sede desactivada correctamente" });
     } catch (error) {
     
-        res.status(500).json({error: "No se puede eliminar la sede porque tiene doctores o usuarios asociados." });
+        res.status(500).json({error: error.message });
     }
 };
 
