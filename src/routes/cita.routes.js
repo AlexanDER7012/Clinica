@@ -10,5 +10,6 @@ router.post("/registrar-completo", citas.registrarCitaCompleta);
 router.post("/create", citas.createCita);
 router.put("/update/:id", citas.updateCita);
 router.delete("/delete/:id", citas.deleteCita);
+router.patch("/update-receta/:id", citas.updateRecetaCita);
 
 export default router;

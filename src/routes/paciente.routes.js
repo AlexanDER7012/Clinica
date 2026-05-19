@@ -5,8 +5,10 @@ const router = Router();
 
 router.get("/", pacientes.getPacientes);
 router.get("/:id", pacientes.getPacienteById);
+router.get("/dpi/:dpi", pacientes.getPacienteByDpi);
 router.post("/create/", pacientes.createPaciente);
 router.put("/update/:id", pacientes.updatePaciente);
 router.delete("/delete/:id", pacientes.deletePaciente);
+
 
 export default router;

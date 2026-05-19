@@ -6,7 +6,6 @@ const register = async (req, res) => {
     try{
         const {nombres, email, password, rol, sedeId} = req.body;
 
-
         const usuarioExiste = await prisma.usuario.findUnique({
             where: {email}
         });
@@ -34,7 +33,7 @@ const register = async (req, res) => {
                 id: nuevoUsuario.id_usuario,
                 nombres: nuevoUsuario.nombres,
                 email: nuevoUsuario.email,
-                rol: nuevoUsuario.rol
+                role: nuevoUsuario.rol
             }
         });
 
@@ -53,10 +52,47 @@ const login = async (req, res) => {
             return res.status(404).json({ mensaje: "Usuario no encontrado" });
         }
 
+        if (!usuario.estado) {
+            return res.status(403).json({ mensaje: "Este usuario ha sido deshabilitado del sistema" });
+        }
+
+
+        if (usuario.bloqueado) {
+            return res.status(423).json({ 
+                mensaje: "Esta cuenta se encuentra bloqueada por superar el límite de 3 intentos fallidos. Contacte al Administrador." 
+            });
+        }
 
         const validPassword = await bcrypt.compare(password, usuario.password);
+        
         if (!validPassword) {
-            return res.status(401).json({ mensaje: "Contraseña incorrecta" });
+            const nuevosIntentos = usuario.intentos_fallidos + 1;
+            const debeBloquearse = nuevosIntentos >= 3;
+
+            await prisma.usuario.update({
+                where: { id_usuario: usuario.id_usuario },
+                data: {
+                    intentos_fallidos: nuevosIntentos,
+                    bloqueado: debeBloquearse
+                }
+            });
+
+            if (debeBloquearse) {
+                return res.status(423).json({ 
+                    mensaje: "Contraseña incorrecta. Has alcanzado el límite de intentos. Tu cuenta ha sido bloqueada." 
+                });
+            }
+
+            return res.status(401).json({ 
+                mensaje: `Contraseña incorrecta. Te quedan ${3 - nuevosIntentos} intentos antes de bloquear la cuenta.` 
+            });
+        }
+
+        if (usuario.intentos_fallidos > 0) {
+            await prisma.usuario.update({
+                where: { id_usuario: usuario.id_usuario },
+                data: { intentos_fallidos: 0 }
+            });
         }
 
         const token = jwt.sign(

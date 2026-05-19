@@ -2,7 +2,13 @@ import prisma from '../config/prisma.js';
 
 const getPacientes = async (req, res) => {
     try{
-        const pacientes = await prisma.paciente.findMany();
+        const pacientes = await prisma.paciente.findMany({
+            include: {
+                _count: {
+                    select: { citas: true }
+                }
+            }
+        });
         res.json(pacientes);
     }catch(error){
         res.status(500).json({ error : error.message})
@@ -11,45 +17,67 @@ const getPacientes = async (req, res) => {
 
 const getPacienteById = async (req, res) =>{
     try{
-    const {id} = req.params;
+        const {id} = req.params;
 
-    const paciente  = await prisma.paciente.findUnique({
-        where: {id_paciente: parseInt(id)},
-    });
+        const paciente  = await prisma.paciente.findUnique({
+            where: {id_paciente: parseInt(id)},
+            include: {
+                citas: {
+                    include: {
+                        doctor: {
+                            select: { nombres: true, especialidad: true }
+                        },
+                        sede: {
+                            select: { nombre: true }
+                        }
+                    },
+                    orderBy: {
+                        fecha: 'desc'
+                    }
+                }
+            }
+        });
 
-    if(!paciente){
-        return res.status(404).json({error: 'Paciente no encontrado'});
-    }
-    res.json(paciente);
+        if(!paciente){
+            return res.status(404).json({error: 'Paciente no encontrado'});
+        }
+        res.json(paciente);
 
     }catch(error){
         res.status(500).json({error: error.message});
     }
-
 };
+
 const getPacienteByDpi = async (req, res) => {
-try{
-    const { dpi } = req.params;
-    const paciente = await prisma.paciente.findUnique({
-    where: {dpi},
-        include: {
-        citas: {
-        include: {
-            doctor: {
-              select: { nombres: true, especialidad: true } // Para saber quién lo atendió
+    try{
+        const { dpi } = req.params;
+        const paciente = await prisma.paciente.findUnique({
+            where: {dpi},
+            include: {
+                citas: {
+                    include: {
+                        doctor: {
+                            select: { nombres: true, especialidad: true } 
+                        },
+                        sede: {
+                            select: { nombre: true }
+                        }
+                    },
+                    orderBy: {
+                        fecha: 'desc' 
+                    }
+                }
             }
-        }
-        }
-    }
-    });
+        });
 
-    if(!paciente) return res.status(404).json({ mensaje: "Paciente no encontrado" });
-    
-    res.json(paciente);
-}catch (error){
-    res.status(500).json({ error: error.message });
-}
+        if(!paciente) return res.status(404).json({ mensaje: "Paciente no encontrado" });
+        
+        res.json(paciente);
+    }catch (error){
+        res.status(500).json({ error: error.message });
+    }
 };
+
 const createPaciente = async (req, res) => {
     const { 
         nombres, 
@@ -76,7 +104,7 @@ const createPaciente = async (req, res) => {
                 fecha_nacimiento: new Date(fecha_nacimiento) 
             },
         });
-    res.status(201).json(pacienteNuevo);
+        res.status(201).json(pacienteNuevo);
 
     }catch(error){
         res.status(500).json({error: error.message});
@@ -85,7 +113,6 @@ const createPaciente = async (req, res) => {
 
 const updatePaciente = async (req, res) => {
     try{
-
         const {id} = req.params;
         const { 
             nombres, apellidos, dpi, sexo, telefono, 
@@ -94,7 +121,7 @@ const updatePaciente = async (req, res) => {
 
         const pacienteActualizado = await prisma.paciente.update({
             where: {id_paciente: parseInt(id)},
-           data: {
+            data: {
                 nombres,
                 apellidos,
                 dpi,
@@ -133,5 +160,5 @@ export{
     createPaciente,
     updatePaciente,
     deletePaciente,
-
+    getPacienteByDpi 
 };

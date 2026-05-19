@@ -99,6 +99,7 @@ const registrarCitaCompleta = async (req, res) => {
         });
     }
 };
+
 const getCitas = async (req, res) => {
     try{
         const { doctorId, pacienteId } = req.query;
@@ -124,9 +125,7 @@ const getCitas = async (req, res) => {
                 doctor: cita.doctor.nombres,
                 motivo: cita.motivo,
                 estado: cita.estado,
-
                 fecha_iso: cita.fecha, 
-
                 fecha_reporte: new Intl.DateTimeFormat('es-GT', {
                     dateStyle: 'medium',
                     timeStyle: 'short',
@@ -147,7 +146,7 @@ const getCitas = async (req, res) => {
 
 const createCita = async (req, res) => {
     try {
-        const { fecha, motivo, pacienteId, doctorId } = req.body;
+        const { fecha, motivo, pacienteId, doctorId, sedeId } = req.body; // ◄ NUEVO: Se mapea sedeId que viene del request body para PostgreSQL
 
         const fechaConZona = fecha.includes('Z') || fecha.includes('-') 
             ? fecha 
@@ -212,11 +211,13 @@ const createCita = async (req, res) => {
                 motivo,
                 pacienteId: parseInt(pacienteId),
                 doctorId: parseInt(doctorId),
+                sedeId: parseInt(sedeId), 
                 estado: 'PENDIENTE'
             },
             include: {
                 doctor: true,
-                paciente: true
+                paciente: true,
+                sede: true 
             }
         });
 
@@ -228,13 +229,12 @@ const createCita = async (req, res) => {
     }
 };
 
-
 const getCitaById = async (req, res) =>{
     try{
         const { id } = req.params;
         const cita = await prisma.cita.findUnique({
             where: { id_cita: parseInt(id) },
-            include: { paciente: true, doctor: true }
+            include: { paciente: true, doctor: true, sede: true } 
         });
 
         if(!cita) return res.status(404).json({ error: 'Cita no encontrada' });
@@ -244,11 +244,10 @@ const getCitaById = async (req, res) =>{
     }
 };
 
-
 const updateCita = async (req, res) => {
     try {
         const { id } = req.params;
-        const { fecha, motivo, estado, doctorId } = req.body;
+        const { fecha, motivo, estado, doctorId, receta_medica } = req.body; 
 
         const actualizada = await prisma.cita.update({
             where: { id_cita: parseInt(id)},
@@ -256,6 +255,7 @@ const updateCita = async (req, res) => {
                 fecha: fecha ? new Date(fecha) : undefined,
                 motivo,
                 estado, 
+                receta_medica, 
                 doctorId: doctorId ? parseInt(doctorId) : undefined
             }
         });
@@ -265,6 +265,31 @@ const updateCita = async (req, res) => {
     }
 };
 
+
+const updateRecetaCita = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { receta_medica } = req.body;
+
+        if (!receta_medica || receta_medica.trim() === "") {
+            return res.status(400).json({ error: "El contenido de la receta médica no puede estar vacío." });
+        }
+
+        const citaConReceta = await prisma.cita.update({
+            where: { id_cita: parseInt(id) },
+            data: { receta_medica: receta_medica },
+            include: { paciente: true, doctor: true }
+        });
+
+        res.json({
+            message: "Receta médica registrada exitosamente en el sistema.",
+            cita: citaConReceta
+        });
+    } catch (error) {
+        console.error("Error en updateRecetaCita:", error);
+        res.status(500).json({ error: "Error al actualizar la receta: " + error.message });
+    }
+};
 
 const deleteCita = async (req, res) => {
     try{
@@ -282,5 +307,6 @@ export{
     createCita,
     updateCita,
     deleteCita,
-    registrarCitaCompleta
+    registrarCitaCompleta,
+    updateRecetaCita 
 }

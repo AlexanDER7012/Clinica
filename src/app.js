@@ -9,6 +9,9 @@ import especialidades from "./routes/especialidad.routes.js";
 import usuarios from "./routes/usuario.routes.js";
 import citas from "./routes/cita.routes.js";
 import auth from "./routes/auth.routes.js";
+import facturas from "./routes/factura.routes.js"; 
+import reportes from "./routes/reporte.routes.js";
+
 const configCors = {
     origin:"http://127.0.0.1:5500"
 };
@@ -28,5 +31,7 @@ app.use("/especialidades", especialidades);
 app.use("/usuarios", usuarios);
 app.use("/citas",citas);
 app.use("/auth", auth);
+app.use("/facturas", facturas);
+app.use("/reportes", reportes);
 
 export default app;

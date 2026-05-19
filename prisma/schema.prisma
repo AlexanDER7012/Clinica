@@ -90,6 +90,7 @@ model Cita {
   id_cita    Int        @id @default(autoincrement())
   fecha      DateTime
   motivo     String?
+  receta_medica   String?   
   precio_consulta Decimal @default(0.00)
   estado     EstadoCita @default(PENDIENTE)
   pacienteId Int
