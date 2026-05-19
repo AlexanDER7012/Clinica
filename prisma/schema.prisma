@@ -4,30 +4,47 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
+
+
 
 model Usuario {
-  id_usuario Int    @id @default(autoincrement())
-  nombres    String
-  email      String @unique
-  password   String
-  rol        Rol
-  estado     Boolean  @default(true)
-  sedeId     Int?
-  sede       Sede?   @relation(fields: [sedeId], references: [id_sede])
+  id_usuario       Int            @id @default(autoincrement())
+  nombres          String
+  email            String         @unique
+  password         String         
+  rol              Rol
+  estado           Boolean        @default(true)
+  intentos_fallidos Int           @default(0)
+  bloqueado        Boolean        @default(false)
+  sedeId           Int?
+  sede             Sede?          @relation(fields: [sedeId], references: [id_sede])
+  logs             LogAuditoria[]
 }
 
+model LogAuditoria {
+  id_log         Int      @id @default(autoincrement())
+  accion         String   
+  tabla_afectada String?
+  ip_origen      String? 
+  detalle        String?
+  fecha_hora     DateTime @default(now())
+  usuarioId      Int?
+  usuario        Usuario? @relation(fields: [usuarioId], references: [id_usuario])
+}
+
+
 model Sede {
-  id_sede   Int       @id @default(autoincrement())
-  nombre    String
-  direccion String
-  telefono  String?
-  email     String?
-  estado    Boolean  @default(true)
-  doctores  Doctor[]
-  usuarios  Usuario[]
-  citas     Cita[]
+  id_sede    Int        @id @default(autoincrement())
+  nombre     String
+  direccion  String
+  telefono   String?
+  email      String?
+  estado     Boolean    @default(true)
+  doctores   Doctor[]
+  usuarios   Usuario[]
+  citas      Cita[]
+  reportes   ReporteEstadistico[]
 }
 
 model Especialidad {
@@ -41,16 +58,17 @@ model Especialidad {
 model Doctor {
   id_doctor      Int          @id @default(autoincrement())
   nombres        String
-  dpi            String        @unique
+  dpi            String       @unique
   telefono       String?
   email          String?
-  estado         Boolean  @default(true)
+  estado         Boolean      @default(true)
   especialidadId Int
   sedeId         Int
   citas          Cita[]
   especialidad   Especialidad @relation(fields: [especialidadId], references: [id_especialidad])
   sede           Sede         @relation(fields: [sedeId], references: [id_sede])
 }
+
 
 model Paciente {
   id_paciente         Int      @id @default(autoincrement())
@@ -72,15 +90,45 @@ model Cita {
   id_cita    Int        @id @default(autoincrement())
   fecha      DateTime
   motivo     String?
+  precio_consulta Decimal @default(0.00)
   estado     EstadoCita @default(PENDIENTE)
   pacienteId Int
   doctorId   Int
-  sedeId     Int        
-  sede       Sede       @relation(fields: [sedeId], references: [id_sede])
+  sedeId     Int
   createdAt  DateTime   @default(now())
+  sede       Sede       @relation(fields: [sedeId], references: [id_sede])
   doctor     Doctor     @relation(fields: [doctorId], references: [id_doctor])
   paciente   Paciente   @relation(fields: [pacienteId], references: [id_paciente])
+  factura    Factura?
 }
+
+
+model Factura {
+  id_factura   Int      @id @default(autoincrement())
+  serie        String   
+  numero       String
+  autorizacion String   
+  monto        Decimal
+  nit_emisor   String   @default("1234567-8")
+  nit_receptor String
+  xml_firmado  String?  @db.Text 
+  fecha_emision DateTime @default(now())
+  citaId       Int      @unique
+  cita         Cita     @relation(fields: [citaId], references: [id_cita])
+}
+
+model ReporteEstadistico {
+  id_reporte     Int      @id @default(autoincrement())
+  tipo_reporte   String  
+  datos_json     Json     
+  mes_referencia Int
+  anio_referencia Int
+  sedeId         Int
+  sede           Sede     @relation(fields: [sedeId], references: [id_sede])
+  createdAt      DateTime @default(now())
+}
+
+
 
 enum Rol {
   ADMIN
