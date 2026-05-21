@@ -101,21 +101,25 @@ const registrarCitaCompleta = async (req, res) => {
 };
 
 const getCitas = async (req, res) => {
-    try{
+    try {
+        console.log('req.usuario:', req.usuario);
         const { doctorId, pacienteId } = req.query;
 
+        const sedeIdDelToken = req.usuario?.rol === 'SECRETARIA' 
+            ? req.usuario.sedeId 
+            : null;
+        console.log('sedeIdDelToken:', sedeIdDelToken);
         const citas = await prisma.cita.findMany({
             where: {
-                ...(doctorId && { doctorId: parseInt(doctorId) }),
-                ...(pacienteId && { pacienteId: parseInt(pacienteId) }),
+                ...(doctorId       && { doctorId:   parseInt(doctorId)   }),
+                ...(pacienteId     && { pacienteId: parseInt(pacienteId) }),
+                ...(sedeIdDelToken && { sedeId:     sedeIdDelToken       }),
             },
             include: {
-                doctor: { select: { nombres: true, especialidad: true } },
+                doctor:   { select: { nombres: true, especialidad: true } },
                 paciente: { select: { nombres: true, apellidos: true } }
             },
-            orderBy: {
-                fecha: 'asc'
-            }
+            orderBy: { fecha: 'asc' }
         });
 
         const reporteTraducido = citas.map(cita => {

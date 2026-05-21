@@ -4,12 +4,12 @@ import { verificarToken } from "../middlewares/auth.middleware.js";
 const router = Router();
 
 
-router.get("/", citas.getCitas);
-router.get("/:id", citas.getCitaById);
-router.post("/registrar-completo", citas.registrarCitaCompleta);
-router.post("/create", citas.createCita);
-router.put("/update/:id", citas.updateCita);
-router.delete("/delete/:id", citas.deleteCita);
-router.patch("/update-receta/:id", citas.updateRecetaCita);
+router.get("/",verificarToken, citas.getCitas);
+router.get("/:id",citas.getCitaById);
+router.post("/registrar-completo",citas.registrarCitaCompleta); 
+router.post("/create",verificarToken, citas.createCita);
+router.put("/update/:id", verificarToken, citas.updateCita);
+router.delete("/delete/:id",verificarToken, citas.deleteCita);
+router.patch("/update-receta/:id",verificarToken, citas.updateRecetaCita);
 
 export default router;

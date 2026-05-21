@@ -1,8 +1,8 @@
 (function () {
     const token = localStorage.getItem('token');
-    
-    if (!token) {
-        console.warn("Acceso no autorizado. Redirigiendo al login...");
+    const usuario = localStorage.getItem('usuario');
+
+    if (!token || !usuario) {
         window.location.href = 'index.html';
     }
 })();
