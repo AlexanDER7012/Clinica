@@ -1,6 +1,5 @@
 import prisma from '../config/prisma.js';
-
-
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
 const getPacientes = async (req, res) => {
     try{
@@ -50,6 +49,35 @@ const getPacienteById = async (req, res) =>{
     }
 };
 
+const getPacienteByDpi = async (req, res) => {
+    try{
+        const { dpi } = req.params;
+        const paciente = await prisma.paciente.findUnique({
+            where: {dpi},
+            include: {
+                citas: {
+                    include: {
+                        doctor: {
+                            select: { nombres: true, especialidad: true } 
+                        },
+                        sede: {
+                            select: { nombre: true }
+                        }
+                    },
+                    orderBy: {
+                        fecha: 'desc' 
+                    }
+                }
+            }
+        });
+
+        if(!paciente) return res.status(404).json({ mensaje: "Paciente no encontrado" });
+        
+        res.json(paciente);
+    }catch (error){
+        res.status(500).json({ error: error.message });
+    }
+};
 const buscarPaciente = async (req, res) => {
     try {
         const { q } = req.query;
@@ -85,36 +113,6 @@ const buscarPaciente = async (req, res) => {
     }
 };
 
-const getPacienteByDpi = async (req, res) => {
-    try{
-        const { dpi } = req.params;
-        const paciente = await prisma.paciente.findUnique({
-            where: {dpi},
-            include: {
-                citas: {
-                    include: {
-                        doctor: {
-                            select: { nombres: true, especialidad: true } 
-                        },
-                        sede: {
-                            select: { nombre: true }
-                        }
-                    },
-                    orderBy: {
-                        fecha: 'desc' 
-                    }
-                }
-            }
-        });
-
-        if(!paciente) return res.status(404).json({ mensaje: "Paciente no encontrado" });
-        
-        res.json(paciente);
-    }catch (error){
-        res.status(500).json({ error: error.message });
-    }
-};
-
 const createPaciente = async (req, res) => {
     const { 
         nombres, 
@@ -141,6 +139,15 @@ const createPaciente = async (req, res) => {
                 fecha_nacimiento: new Date(fecha_nacimiento) 
             },
         });
+
+        await registrarLog({
+            accion: 'CREAR_PACIENTE',
+            tabla_afectada: 'Paciente',
+            ip_origen:getIp(req),
+            detalle: `Paciente ${nombres} ${apellidos} (DPI: ${dpi}) registrado`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.status(201).json(pacienteNuevo);
 
     }catch(error){
@@ -170,6 +177,16 @@ const updatePaciente = async (req, res) => {
                 fecha_nacimiento: fecha_nacimiento ? new Date(fecha_nacimiento) : undefined
             },
         });
+
+        // ── Log ──────────────────────────────────────────────
+        await registrarLog({
+            accion:         'MODIFICAR_PACIENTE',
+            tabla_afectada: 'Paciente',
+            ip_origen:      getIp(req),
+            detalle:        `Paciente #${id} (${nombres} ${apellidos}) modificado`,
+            usuarioId:      req.usuario?.id || null
+        });
+
         res.json(pacienteActualizado);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -180,8 +197,16 @@ const deletePaciente = async (req, res) =>{
     try{
         const {id} = req.params;
 
-        const pacienteELiminado = await prisma.paciente.delete({
+        await prisma.paciente.delete({
             where: {id_paciente: parseInt(id)},
+        });
+
+        await registrarLog({
+            accion: 'ELIMINAR_PACIENTE',
+            tabla_afectada:'Paciente',
+            ip_origen: getIp(req),
+            detalle: `Paciente #${id} eliminado del sistema`,
+            usuarioId: req.usuario?.id || null
         });
 
         res.json({ message: "Paciente eliminado correctamente"});
@@ -190,10 +215,6 @@ const deletePaciente = async (req, res) =>{
         res.status(500).json({error: error.message});
     }
 };
-
-
-
-
 
 export{
     getPacientes,

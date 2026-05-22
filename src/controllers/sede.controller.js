@@ -1,5 +1,5 @@
 import prisma from '../config/prisma.js';
-
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
 const getSedes = async (req, res) => {
     try {
@@ -18,7 +18,6 @@ const getSedes = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 const getSedeById = async (req, res) => {
     try{
@@ -51,6 +50,15 @@ const createSede = async (req, res) => {
                 email
             }
         });
+
+        await registrarLog({
+            accion: 'CREAR_SEDE',
+            tabla_afectada: 'Sede',
+            ip_origen: getIp(req),
+            detalle:`Sede "${nombre}" registrada en el sistema`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.status(201).json(nuevaSede);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -72,11 +80,21 @@ const updateSede = async (req, res) => {
                 estado: estado !== undefined ? estado : undefined
             }
         });
+
+        await registrarLog({
+            accion: 'MODIFICAR_SEDE',
+            tabla_afectada: 'Sede',
+            ip_origen: getIp(req),
+            detalle: `Sede #${id} "${nombre}" modificada`,
+            usuarioId:req.usuario?.id || null
+        });
+
         res.json(sedeActualizada);
     }catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
+
 const deleteSede = async (req, res) => {
     try{
         const {id} = req.params;
@@ -86,9 +104,16 @@ const deleteSede = async (req, res) => {
             data: { estado: false }
         });
 
+        await registrarLog({
+            accion: 'DESACTIVAR_SEDE',
+            tabla_afectada: 'Sede',
+            ip_origen: getIp(req),
+            detalle:`Sede #${id} desactivada del sistema`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.json({message: "Sede desactivada correctamente" });
     } catch (error) {
-    
         res.status(500).json({error: error.message });
     }
 };

@@ -1,8 +1,13 @@
+/* ══════════════════════════════════════
+   js/admin.js — Punto de entrada ADMIN
+══════════════════════════════════════ */
+
 import { verificarSesion, initLogout } from './menuAuth.js';
 import { initDoctorForm, initSedeForm, initEspecialidadForm, cargarSelectsFormulario } from './menuForms.js';
 import { initControlModule, cambiarContextoControl }from './menuControl.js';
 import { initDashboard, initAreaChart, initBarMiniChart } from './menuCharts.js';
 import { initUsuariosModule, cargarModuloUsuarios } from './menuUsuarios.js';
+import { initAuditoriaModule, cargarModuloAuditoria } from './menuAuditoria.js';
 import { API_URL }from './menuConfig.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEspecialidadForm();
   initControlModule();
   initUsuariosModule();
+  initAuditoriaModule();
   initLogout();
   initAreaChart();
   initBarMiniChart();
@@ -34,6 +40,7 @@ function initRouter() {
     'btn-nav-usuarios':    { sec: 'sec-usuarios',     titulo: 'Gestión de Usuarios del Sistema' },
     'btn-nav-excepciones': { sec: 'sec-excepciones',  titulo: 'Gestión de Especialidades Médicas' },
     'btn-nav-control':     { sec: 'sec-control',      titulo: 'Módulo de Control y Mantenimiento' },
+    'btn-nav-auditoria':   { sec: 'sec-auditoria',    titulo: 'Log de Auditoría del Sistema' },
   };
 
   const pageTitle = document.getElementById('dinamic-title');
@@ -58,6 +65,7 @@ function initRouter() {
       if (btnId === 'btn-nav-usuarios')  cargarModuloUsuarios();
       if (btnId === 'btn-nav-pacientes') cargarPacientes();
       if (btnId === 'btn-nav-dashboard') initDashboard();
+      if (btnId === 'btn-nav-auditoria') cargarModuloAuditoria();
     });
   });
 }
@@ -73,8 +81,8 @@ async function cargarPacientes() {
     const res       = await fetch(`${API_URL}/pacientes`, { headers: { 'Authorization': `Bearer ${token}` } });
     const pacientes = await res.json();
 
-    if (pacientes.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="padding:20px; text-align:center; color:#888;">No hay pacientes registrados.</td></tr>`;
+    if (!pacientes.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:20px; text-align:center; color:#888;">No hay pacientes.</td></tr>`;
       return;
     }
 

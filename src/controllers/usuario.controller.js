@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
 const getUsuarios = async (req, res) => {
     try{
@@ -44,6 +45,15 @@ const createUsuario = async (req, res) =>{
                 sedeId: sedeId ? parseInt(sedeId) : null 
             }
         });
+
+        await registrarLog({
+            accion: 'CREAR_USUARIO',
+            tabla_afectada: 'Usuario',
+            ip_origen: getIp(req),
+            detalle: `Usuario ${nombres} (${email}) creado con rol ${rol}`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.status(201).json(nuevoUsuario);
     }catch(error){
         if (error.code==='P2002') {
@@ -76,6 +86,7 @@ const updateUsuario = async (req, res) =>{
         res.status(500).json({ error: error.message });
     }
 };
+
 const desbloquearUsuario = async (req, res) => {
     try {
         const { id } = req.params;
@@ -86,6 +97,15 @@ const desbloquearUsuario = async (req, res) => {
                 intentos_fallidos: 0,
                 bloqueado: false
             }
+        });
+
+        // ── Log ──────────────────────────────────────────────
+        await registrarLog({
+            accion: 'DESBLOQUEAR_USUARIO',
+            tabla_afectada:'Usuario',
+            ip_origen: getIp(req),
+            detalle: `Usuario ${usuarioDesbloqueado.nombres} (${usuarioDesbloqueado.email}) desbloqueado`,
+            usuarioId: req.usuario?.id || null
         });
 
         res.json({ 
@@ -109,6 +129,14 @@ const deleteUsuario = async (req, res) => {
         await prisma.usuario.update({ 
             where: { id_usuario: parseInt(id) },
             data: { estado: false }
+        });
+
+        await registrarLog({
+            accion:'DESACTIVAR_USUARIO',
+            tabla_afectada: 'Usuario',
+            ip_origen:      getIp(req),
+            detalle:`Usuario #${id} desactivado del sistema`,
+            usuarioId: req.usuario?.id || null
         });
 
         res.json({ message: "Usuario desactivado correctamente" });

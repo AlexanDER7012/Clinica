@@ -1,36 +1,35 @@
 import prisma from '../config/prisma.js';
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
-// ── MODIFICADO: Recibe receta, precio y nit en un solo flujo ──
 const emitirFactura = async (req, res) => {
     const { citaId, nit_receptor, receta_medica, precio_consulta } = req.body;
 
-    try{
+    try {
         const cita = await prisma.cita.findUnique({
             where: { id_cita: parseInt(citaId) },
             include: { factura: true, paciente: true }
         });
 
-        if (!cita){
+        if (!cita) {
             return res.status(404).json({ error: "La cita médica no existe en el sistema." });
         }
 
-        if (cita.estado !== 'CONFIRMADA'){
+        if (cita.estado !== 'CONFIRMADA') {
             return res.status(400).json({ 
                 error: `No se puede facturar una cita en estado ${cita.estado}. La cita debe estar CONFIRMADA.` 
             });
         }
 
-        if (cita.factura){
+        if (cita.factura) {
             return res.status(400).json({ 
                 error: `La cita ya cuenta con la factura Serie ${cita.factura.serie} Número ${cita.factura.numero}` 
             });
         }
 
-        if(!precio_consulta || parseFloat(precio_consulta) <= 0) {
+        if (!precio_consulta || parseFloat(precio_consulta) <= 0) {
             return res.status(400).json({ error: "El precio de consulta debe ser mayor a 0." });
         }
 
-        // ── Generación FEL simulada ───────────────────────────
         const serieAleatoria  = "FEL";
         const numeroAleatorio = Math.floor(10000000 + Math.random() * 90000000).toString();
         const uuidSat         = `E4B3D2A1-C5B6-7D8E-9F0A-${Math.floor(100000000000 + Math.random() * 900000000000)}`;
@@ -57,13 +56,12 @@ const emitirFactura = async (req, res) => {
 </dte:GTDocumento>`.trim();
 
         const resultado = await prisma.$transaction(async (tx) => {
-
             await tx.cita.update({
                 where: { id_cita: parseInt(citaId) },
                 data: {
                     receta_medica:   receta_medica || null,
                     precio_consulta: montoFinal,
-                    estado:'FINALIZADA'
+                    estado:          'FINALIZADA'
                 }
             });
 
@@ -89,6 +87,15 @@ const emitirFactura = async (req, res) => {
                     include: { paciente: true, doctor: true, sede: true }
                 }
             }
+        });
+
+        // ── Log ──────────────────────────────────────────────
+        await registrarLog({
+            accion: 'EMITIR_FACTURA',
+            tabla_afectada: 'Factura',
+            ip_origen: getIp(req),
+            detalle: `Factura ${serieAleatoria}-${numeroAleatorio} emitida por Q${montoFinal} — Paciente: ${cita.paciente.nombres} ${cita.paciente.apellidos}`,
+            usuarioId: req.usuario?.id || null
         });
 
         res.status(201).json({

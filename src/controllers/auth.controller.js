@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
 const register = async (req, res) => {
     try{
@@ -27,6 +28,14 @@ const register = async (req, res) => {
             }
         });
 
+        await registrarLog({
+            accion:'CREAR_USUARIO',
+            tabla_afectada: 'Usuario',
+            ip_origen: getIp(req),
+            detalle:`Usuario ${nombres} (${email}) creado con rol ${rol}`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.status(201).json({
             mensaje: "Usuario creado con éxito",
             usuario: {
@@ -46,18 +55,36 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try{
         const {email, password} = req.body;
+        const ip = getIp(req);
 
         const usuario = await prisma.usuario.findUnique({ where: { email }});
+
         if(!usuario){
+            await registrarLog({
+                accion:    'LOGIN_FALLIDO',
+                ip_origen: ip,
+                detalle:   `Intento de login con email inexistente: ${email}`
+            });
             return res.status(404).json({ mensaje: "Usuario no encontrado" });
         }
 
         if (!usuario.estado) {
+            await registrarLog({
+                accion:    'LOGIN_BLOQUEADO',
+                ip_origen: ip,
+                detalle:   `Intento de acceso a cuenta deshabilitada: ${email}`,
+                usuarioId: usuario.id_usuario
+            });
             return res.status(403).json({ mensaje: "Este usuario ha sido deshabilitado del sistema" });
         }
 
-
         if (usuario.bloqueado) {
+            await registrarLog({
+                accion:    'LOGIN_BLOQUEADO',
+                ip_origen: ip,
+                detalle:   `Intento de acceso a cuenta bloqueada: ${email}`,
+                usuarioId: usuario.id_usuario
+            });
             return res.status(423).json({ 
                 mensaje: "Esta cuenta se encuentra bloqueada por superar el límite de 3 intentos fallidos. Contacte al Administrador." 
             });
@@ -75,6 +102,15 @@ const login = async (req, res) => {
                     intentos_fallidos: nuevosIntentos,
                     bloqueado: debeBloquearse
                 }
+            });
+
+            await registrarLog({
+                accion:    debeBloquearse ? 'CUENTA_BLOQUEADA' : 'LOGIN_FALLIDO',
+                ip_origen: ip,
+                detalle:   debeBloquearse
+                    ? `Cuenta bloqueada por 3 intentos fallidos: ${email}`
+                    : `Contraseña incorrecta para ${email}. Intento ${nuevosIntentos}/3`,
+                usuarioId: usuario.id_usuario
             });
 
             if (debeBloquearse) {
@@ -104,6 +140,13 @@ const login = async (req, res) => {
             process.env.JWT_SECRET, 
             {expiresIn: '9h'}
         );
+
+        await registrarLog({
+            accion:    'LOGIN_EXITOSO',
+            ip_origen: ip,
+            detalle:   `${usuario.nombres} (${usuario.rol}) inició sesión`,
+            usuarioId: usuario.id_usuario
+        });
 
         res.json({
             mensaje: "Login exitoso",

@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { registrarLog, getIp } from '../helpers/auditoria.helper.js';
 
 const getDoctores = async (req, res) => {
     try{
@@ -53,6 +54,15 @@ const createDoctor = async (req, res) =>{
             },  
             include: { especialidad: true, sede: true }
         });
+
+        await registrarLog({
+            accion: 'CREAR_DOCTOR',
+            tabla_afectada: 'Doctor',
+            ip_origen: getIp(req),
+            detalle:`Doctor ${nombres} (DPI: ${dpi}) registrado`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.status(201).json(doctorNuevo);
     } catch(error){
         res.status(500).json({error: error.message});
@@ -76,6 +86,15 @@ const updateDoctor = async (req, res) => {
             },
             include: { especialidad: true, sede: true }
         });
+
+        await registrarLog({
+            accion: 'MODIFICAR_DOCTOR',
+            tabla_afectada: 'Doctor',
+            ip_origen: getIp(req),
+            detalle: `Doctor #${id} (${nombres}) modificado`,
+            usuarioId: req.usuario?.id || null
+        });
+
         res.json(doctorActualizado);
     }catch(error){
         res.status(500).json({error: error.message});
@@ -86,9 +105,17 @@ const deleteDoctor = async (req, res) =>{
     try{
         const {id} = req.params;
 
-        const doctorDesactivado = await prisma.doctor.update({
+        await prisma.doctor.update({
             where: {id_doctor: parseInt(id)},
             data: { estado: false }
+        });
+
+        await registrarLog({
+            accion: 'DESACTIVAR_DOCTOR',
+            tabla_afectada: 'Doctor',
+            ip_origen:getIp(req),
+            detalle: `Doctor #${id} desactivado del sistema`,
+            usuarioId:  req.usuario?.id || null
         });
 
         res.json({ message: "Doctor desactivado correctamente"});

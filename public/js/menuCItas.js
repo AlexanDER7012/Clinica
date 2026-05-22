@@ -1,13 +1,8 @@
-/* ══════════════════════════════════════
-   js/menuCitas.js
-   Módulo de Gestión de Citas — Panel Admin/Secretaria
-══════════════════════════════════════ */
-
 import { API_URL } from './menuConfig.js';
 
 const estadoCitas = {
-  listaCitas:   [],
-  vistaActual:  'lista',
+  listaCitas:  [],
+  vistaActual: 'lista',
 };
 
 export function initCitasModule() {
@@ -20,6 +15,7 @@ export function initCitasModule() {
   initBuscadorDpi();
   initFormularioCita();
   initFiltros();
+  initModalReprogramar();
 }
 
 export async function cargarModuloCitas() {
@@ -36,7 +32,7 @@ function mostrarVista(vista) {
   if (secNueva) secNueva.style.display = vista === 'nueva' ? 'block' : 'none';
 }
 
-// ── Cargar citas con filtros opcionales ───────────────────────
+// ── Cargar citas ──────────────────────────────────────────────
 export async function cargarListaCitas(filtros = {}) {
   const token = localStorage.getItem('token');
   const tbody = document.getElementById('citas-tbody');
@@ -51,7 +47,7 @@ export async function cargarListaCitas(filtros = {}) {
     });
     if (!res.ok) throw new Error('Error al cargar citas');
 
-    const data            = await res.json();
+    const data             = await res.json();
     estadoCitas.listaCitas = data.citas || [];
     renderizarTablaCitas(estadoCitas.listaCitas);
 
@@ -95,6 +91,10 @@ function renderizarTablaCitas(lista) {
             style="background:#48bb78; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500; margin-right:4px;">
             Confirmar
           </button>
+          <button class="btn-reprogramar" data-id="${cita.id}" data-fecha="${cita.fecha_iso}"
+            style="background:#f6ad55; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500; margin-right:4px;">
+            Reprogramar
+          </button>
           <button class="btn-cancelar-cita" data-id="${cita.id}"
             style="background:#fc8181; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500;">
             Cancelar
@@ -102,8 +102,9 @@ function renderizarTablaCitas(lista) {
       </td>
     `;
 
-    tr.querySelector('.btn-confirmar')?.addEventListener('click',    () => cambiarEstadoCita(cita.id, 'CONFIRMADA'));
+    tr.querySelector('.btn-confirmar')?.addEventListener('click',     () => cambiarEstadoCita(cita.id, 'CONFIRMADA'));
     tr.querySelector('.btn-cancelar-cita')?.addEventListener('click', () => cambiarEstadoCita(cita.id, 'CANCELADA'));
+    tr.querySelector('.btn-reprogramar')?.addEventListener('click',   () => abrirModalReprogramar(cita));
 
     tbody.appendChild(tr);
   });
@@ -138,7 +139,7 @@ async function cambiarEstadoCita(id, nuevoEstado) {
   }
 }
 
-// ── FILTROS: nombre y DPI ─────────────────────────────────────
+// ── Filtros ───────────────────────────────────────────────────
 function initFiltros() {
   const btnFiltrar = document.getElementById('btn-filtrar-citas');
   const btnLimpiar = document.getElementById('btn-limpiar-filtros');
@@ -165,20 +166,149 @@ function initFiltros() {
   }
 }
 
-// ── Poblar selectores nueva cita ──────────────────────────────
+// ── Modal Reprogramar ─────────────────────────────────────────
+function initModalReprogramar() {
+  // Cerrar modal al hacer click fuera
+  const overlay = document.getElementById('modal-reprogramar-overlay');
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) cerrarModalReprogramar();
+    });
+  }
+
+  // Botones cerrar
+  const btnCerrar  = document.getElementById('modal-btn-cerrar');
+  const btnCerrar2 = document.getElementById('modal-btn-cerrar-2');
+  if (btnCerrar)  btnCerrar.addEventListener('click',  cerrarModalReprogramar);
+  if (btnCerrar2) btnCerrar2.addEventListener('click', cerrarModalReprogramar);
+
+  // Submit del formulario de reprogramación
+  const form = document.getElementById('form-reprogramar');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token   = localStorage.getItem('token');
+      const citaId  = document.getElementById('reprog-cita-id')?.value;
+      const fecha   = document.getElementById('reprog-fecha')?.value;
+      const doctor  = document.getElementById('reprog-doctorId')?.value;
+      const errorEl = document.getElementById('modal-error');
+
+      if (!fecha) { 
+        if (errorEl) errorEl.textContent = 'Debe seleccionar una nueva fecha y hora.';
+        return; 
+      }
+
+      try {
+        const payload = {
+          fecha,
+          ...(doctor && { doctorId: parseInt(doctor) })
+        };
+
+        const res  = await fetch(`${API_URL}/citas/update/${citaId}`, {
+          method:  'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body:    JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Error al reprogramar');
+
+        cerrarModalReprogramar();
+        await cargarListaCitas();
+        alert('¡Cita reprogramada exitosamente!');
+      } catch (err) {
+        if (errorEl) errorEl.textContent = `Error: ${err.message}`;
+      }
+    });
+  }
+}
+
+function abrirModalReprogramar(cita) {
+  const overlay  = document.getElementById('modal-reprogramar-overlay');
+  const titulo   = document.getElementById('modal-cita-info');
+  const inputId  = document.getElementById('reprog-cita-id');
+  const inputFecha = document.getElementById('reprog-fecha');
+  const errorEl  = document.getElementById('modal-error');
+
+  if (!overlay) return;
+
+  // Llenar datos
+  if (titulo)    titulo.textContent = `Cita #${cita.id} — ${cita.paciente} con ${cita.doctor}`;
+  if (inputId)   inputId.value      = cita.id;
+  if (errorEl)   errorEl.textContent = '';
+
+  // Pre-llenar con la fecha actual de la cita en formato datetime-local
+  if (inputFecha && cita.fecha_iso) {
+    const fechaLocal = new Date(cita.fecha_iso);
+    const offset     = fechaLocal.getTimezoneOffset();
+    const fechaAdj   = new Date(fechaLocal.getTime() - offset * 60000);
+    inputFecha.value = fechaAdj.toISOString().slice(0, 16);
+    inputFecha.min   = new Date().toISOString().slice(0, 16); // no permitir fechas pasadas
+  }
+
+  // Poblar doctores de la sede del token
+  poblarDoctoresModal();
+
+  // Mostrar modal
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalReprogramar() {
+  const overlay = document.getElementById('modal-reprogramar-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function poblarDoctoresModal() {
+  const token = localStorage.getItem('token');
+  let sedeIdToken = null;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    sedeIdToken   = payload.sedeId || null;
+  } catch (e) {}
+
+  const selDoctor = document.getElementById('reprog-doctorId');
+  if (!selDoctor) return;
+
+  try {
+    const url      = sedeIdToken ? `${API_URL}/doctores?sedeId=${sedeIdToken}` : `${API_URL}/doctores`;
+    const res      = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    const doctores = await res.json();
+
+    selDoctor.innerHTML = '<option value="">— Mantener mismo médico —</option>';
+    doctores.forEach(d => {
+      const esp = d.especialidad?.nombre || '';
+      selDoctor.innerHTML += `<option value="${d.id_doctor}">${d.nombres} — ${esp}</option>`;
+    });
+  } catch (err) {
+    console.error('Error cargando doctores modal:', err);
+  }
+}
+
+// ── Poblar selectores nueva cita (con sede bloqueada) ─────────
 async function poblarSelectoresCita() {
   const token = localStorage.getItem('token');
+  let sedeIdToken = null;
   try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    sedeIdToken   = payload.sedeId || null;
+  } catch (e) {}
+
+  try {
+    const urlDoctores = sedeIdToken
+      ? `${API_URL}/doctores?sedeId=${sedeIdToken}`
+      : `${API_URL}/doctores`;
+
     const [resDoctores, resSedes] = await Promise.all([
-      fetch(`${API_URL}/doctores`, { headers: { 'Authorization': `Bearer ${token}` } }),
-      fetch(`${API_URL}/sedes`,    { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(urlDoctores,        { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(`${API_URL}/sedes`, { headers: { 'Authorization': `Bearer ${token}` } }),
     ]);
+
     const doctores = await resDoctores.json();
     const sedes    = await resSedes.json();
 
     const selDoctor = document.getElementById('cita-doctorId');
-    const selSede   = document.getElementById('cita-sedeId');
-
     if (selDoctor) {
       selDoctor.innerHTML = '<option value="">-- Seleccione Médico --</option>';
       doctores.forEach(d => {
@@ -186,18 +316,28 @@ async function poblarSelectoresCita() {
         selDoctor.innerHTML += `<option value="${d.id_doctor}">${d.nombres} — ${esp}</option>`;
       });
     }
+
+    const selSede = document.getElementById('cita-sedeId');
     if (selSede) {
       selSede.innerHTML = '<option value="">-- Seleccione Sede --</option>';
       sedes.forEach(s => {
         selSede.innerHTML += `<option value="${s.id_sede}">${s.nombre}</option>`;
       });
+
+      if (sedeIdToken) {
+        selSede.value              = sedeIdToken;
+        selSede.disabled           = true;
+        selSede.style.background   = '#f8fafc';
+        selSede.style.color        = '#718096';
+        selSede.style.cursor       = 'not-allowed';
+      }
     }
   } catch (err) {
-    console.error('Error poblando selectores de cita:', err);
+    console.error('Error poblando selectores:', err);
   }
 }
 
-// ── Buscador de paciente por DPI ──────────────────────────────
+// ── Buscador DPI ──────────────────────────────────────────────
 function initBuscadorDpi() {
   const btnBuscar = document.getElementById('btn-buscar-dpi');
   if (!btnBuscar) return;
@@ -217,7 +357,7 @@ function initBuscadorDpi() {
       if (res.ok) {
         const paciente = await res.json();
         if (panel) panel.style.display = 'block';
-        if (info)  info.innerHTML = `
+        if (info) info.innerHTML = `
           <div style="background:#f0fff4; border:1px solid #9ae6b4; border-radius:8px; padding:12px 16px;">
             <p style="margin:0 0 4px; font-weight:600; color:#22543d;">✓ Paciente encontrado</p>
             <p style="margin:0; color:#2d3748; font-size:0.9rem;">
@@ -228,7 +368,7 @@ function initBuscadorDpi() {
         toggleFormularioPaciente(false);
       } else {
         if (panel) panel.style.display = 'block';
-        if (info)  info.innerHTML = `
+        if (info) info.innerHTML = `
           <div style="background:#fff5f5; border:1px solid #fc8181; border-radius:8px; padding:12px 16px;">
             <p style="margin:0; color:#822727; font-size:0.9rem;">⚠ Paciente no encontrado. Complete los datos para registrarlo.</p>
           </div>`;
@@ -252,8 +392,7 @@ function initFormularioCita() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
+    const token    = localStorage.getItem('token');
     const dpi      = document.getElementById('cita-dpi')?.value.trim();
     const doctorId = document.getElementById('cita-doctorId')?.value;
     const sedeId   = document.getElementById('cita-sedeId')?.value;
@@ -295,6 +434,7 @@ function initFormularioCita() {
 
       alert('¡Cita registrada exitosamente!');
       form.reset();
+      await poblarSelectoresCita();
       toggleFormularioPaciente(false);
       const panel = document.getElementById('panel-datos-paciente');
       const info  = document.getElementById('info-paciente-encontrado');
