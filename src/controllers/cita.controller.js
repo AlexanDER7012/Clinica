@@ -102,48 +102,53 @@ const registrarCitaCompleta = async (req, res) => {
 
 const getCitas = async (req, res) => {
     try {
-        console.log('req.usuario:', req.usuario);
-        const { doctorId, pacienteId } = req.query;
+        const { nombre, dpi } = req.query;
 
         const sedeIdDelToken = req.usuario?.rol === 'SECRETARIA' 
             ? req.usuario.sedeId 
             : null;
-        console.log('sedeIdDelToken:', sedeIdDelToken);
+
         const citas = await prisma.cita.findMany({
             where: {
-                ...(doctorId       && { doctorId:   parseInt(doctorId)   }),
-                ...(pacienteId     && { pacienteId: parseInt(pacienteId) }),
-                ...(sedeIdDelToken && { sedeId:     sedeIdDelToken       }),
+                // Filtro por sede si es secretaria
+                ...(sedeIdDelToken && { sedeId: sedeIdDelToken }),
+
+                // Filtro por nombre o DPI del paciente
+                ...(nombre && {
+                    paciente: {
+                        OR: [
+                            { nombres:   { contains: nombre } },
+                            { apellidos: { contains: nombre } },
+                        ]
+                    }
+                }),
+                ...(dpi && {
+                    paciente: { dpi: { contains: dpi } }
+                }),
             },
             include: {
                 doctor:   { select: { nombres: true, especialidad: true } },
-                paciente: { select: { nombres: true, apellidos: true } }
+                paciente: { select: { nombres: true, apellidos: true, dpi: true } }
             },
             orderBy: { fecha: 'asc' }
         });
 
-        const reporteTraducido = citas.map(cita => {
-            return {
-                id: cita.id_cita,
-                paciente: `${cita.paciente.nombres} ${cita.paciente.apellidos}`,
-                doctor: cita.doctor.nombres,
-                motivo: cita.motivo,
-                estado: cita.estado,
-                fecha_iso: cita.fecha, 
-                fecha_reporte: new Intl.DateTimeFormat('es-GT', {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                    timeZone: 'America/Guatemala'
-                }).format(cita.fecha)
-            };
-        });
+        const reporteTraducido = citas.map(cita => ({
+            id:           cita.id_cita,
+            paciente:     `${cita.paciente.nombres} ${cita.paciente.apellidos}`,
+            dpi_paciente: cita.paciente.dpi,
+            doctor:       cita.doctor.nombres,
+            motivo:       cita.motivo,
+            estado:       cita.estado,
+            fecha_iso:    cita.fecha,
+            fecha_reporte: new Intl.DateTimeFormat('es-GT', {
+                dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Guatemala'
+            }).format(cita.fecha)
+        }));
 
-        res.json({
-            total: reporteTraducido.length,
-            citas: reporteTraducido
-        });
+        res.json({ total: reporteTraducido.length, citas: reporteTraducido });
 
-    }catch(error){
+    } catch(error) {
         res.status(500).json({ error: "Error al generar reporte: " + error.message });
     }
 };

@@ -1,5 +1,7 @@
 import prisma from '../config/prisma.js';
 
+
+
 const getPacientes = async (req, res) => {
     try{
         const pacientes = await prisma.paciente.findMany({
@@ -45,6 +47,41 @@ const getPacienteById = async (req, res) =>{
 
     }catch(error){
         res.status(500).json({error: error.message});
+    }
+};
+
+const buscarPaciente = async (req, res) => {
+    try {
+        const { q } = req.query;
+
+        if (!q || q.trim() === '') {
+            return res.status(400).json({ error: 'Ingrese un término de búsqueda.' });
+        }
+
+        const pacientes = await prisma.paciente.findMany({
+            where: {
+                OR: [
+                    { dpi:       { contains: q } },
+                    { nombres:   { contains: q } },
+                    { apellidos: { contains: q } },
+                ]
+            },
+            include: {
+                citas: {
+                    where: { estado: 'CONFIRMADA' },
+                    include: {
+                        doctor: { select: { nombres: true } },
+                        sede:   { select: { nombre: true  } }
+                    },
+                    orderBy: { fecha: 'desc' }
+                }
+            }
+        });
+
+        res.json(pacientes);
+    } catch (error) {
+        console.error('Error en buscarPaciente:', error);
+        res.status(500).json({ error: error.message });
     }
 };
 
@@ -154,11 +191,16 @@ const deletePaciente = async (req, res) =>{
     }
 };
 
+
+
+
+
 export{
     getPacientes,
     getPacienteById,
     createPaciente,
     updatePaciente,
     deletePaciente,
-    getPacienteByDpi 
+    getPacienteByDpi,
+    buscarPaciente
 };

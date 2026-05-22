@@ -2,9 +2,10 @@
    js/secretaria.js — Punto de entrada SECRETARIA
 ══════════════════════════════════════ */
 
-import { verificarSesion, initLogout }          from './menuAuth.js';
-import { initCitasModule, cargarModuloCitas }    from './menuCitas.js';
-import { API_URL }                              from './menuConfig.js';
+import { verificarSesion, initLogout }                from './menuAuth.js';
+import { initCitasModule, cargarModuloCitas }          from './menuCitas.js';
+import { initFacturacionModule, cargarModuloFacturacion } from './menuFacturacion.js';
+import { API_URL }                                    from './menuConfig.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = JSON.parse(localStorage.getItem('usuario'));
@@ -15,23 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initRouter();
   initCitasModule();
+  initFacturacionModule();
   initLogout();
 
-  // Cargar citas al entrar directamente
   cargarModuloCitas();
 });
 
 // ── Router de la secretaria ───────────────────────────────────
 function initRouter() {
-  const pageTitle = document.getElementById('dinamic-title');
+  const pageTitle    = document.getElementById('dinamic-title');
 
   function ocultarTodo() {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active-view'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   }
 
-  const btnCitas     = document.getElementById('btn-nav-citas');
-  const btnPacientes = document.getElementById('btn-nav-pacientes');
+  const btnCitas        = document.getElementById('btn-nav-citas');
+  const btnFacturacion  = document.getElementById('btn-nav-facturacion');
+  const btnPacientes    = document.getElementById('btn-nav-pacientes');
 
   if (btnCitas) {
     btnCitas.addEventListener('click', (e) => {
@@ -39,6 +41,15 @@ function initRouter() {
       document.getElementById('sec-citas')?.classList.add('active-view');
       if (pageTitle) pageTitle.textContent = 'Gestión de Citas Médicas';
       cargarModuloCitas();
+    });
+  }
+
+  if (btnFacturacion) {
+    btnFacturacion.addEventListener('click', (e) => {
+      e.preventDefault(); ocultarTodo(); btnFacturacion.classList.add('active');
+      document.getElementById('sec-facturacion')?.classList.add('active-view');
+      if (pageTitle) pageTitle.textContent = 'Módulo de Facturación';
+      cargarModuloFacturacion();
     });
   }
 
@@ -90,7 +101,7 @@ async function cargarPacientes() {
       `;
       tbody.appendChild(tr);
     });
-  }catch(err){
+  } catch (err) {
     tbody.innerHTML = `<tr><td colspan="6" style="padding:20px; text-align:center; color:red;">Error: ${err.message}</td></tr>`;
   }
 }

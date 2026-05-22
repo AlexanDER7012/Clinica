@@ -4,9 +4,7 @@ import { verificarToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-
-
-router.post("/create", facturaController.emitirFactura);
-router.get("/:id", facturaController.getFacturaById);
+router.post("/create", verificarToken, facturaController.emitirFactura);
+router.get("/:id",     verificarToken, facturaController.getFacturaById);
 
 export default router;

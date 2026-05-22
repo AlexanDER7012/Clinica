@@ -1,36 +1,33 @@
+/* ══════════════════════════════════════
+   js/menuCitas.js
+   Módulo de Gestión de Citas — Panel Admin/Secretaria
+══════════════════════════════════════ */
+
 import { API_URL } from './menuConfig.js';
 
-// ── Estado local del módulo ───────────────────────────────────
 const estadoCitas = {
-  listaCitas: [],
-  vistaActual: 'lista', // 'lista' | 'nueva'
+  listaCitas:   [],
+  vistaActual:  'lista',
 };
 
-// ── Inicialización ────────────────────────────────────────────
 export function initCitasModule() {
-  const btnNuevaCita  = document.getElementById('btn-nueva-cita');
+  const btnNuevaCita   = document.getElementById('btn-nueva-cita');
   const btnVolverLista = document.getElementById('btn-volver-lista');
 
-  if (btnNuevaCita) {
-    btnNuevaCita.addEventListener('click', () => mostrarVista('nueva'));
-  }
-  if (btnVolverLista) {
-    btnVolverLista.addEventListener('click', () => mostrarVista('lista'));
-  }
+  if (btnNuevaCita)   btnNuevaCita.addEventListener('click',   () => mostrarVista('nueva'));
+  if (btnVolverLista) btnVolverLista.addEventListener('click', () => mostrarVista('lista'));
 
   initBuscadorDpi();
   initFormularioCita();
   initFiltros();
 }
 
-// ── Carga pública llamada desde el router ─────────────────────
 export async function cargarModuloCitas() {
   mostrarVista('lista');
   await cargarListaCitas();
   await poblarSelectoresCita();
 }
 
-// ── Alternar sub-vistas ───────────────────────────────────────
 function mostrarVista(vista) {
   estadoCitas.vistaActual = vista;
   const secLista = document.getElementById('citas-sec-lista');
@@ -39,7 +36,7 @@ function mostrarVista(vista) {
   if (secNueva) secNueva.style.display = vista === 'nueva' ? 'block' : 'none';
 }
 
-// ── Cargar lista de citas desde la API ────────────────────────
+// ── Cargar citas con filtros opcionales ───────────────────────
 export async function cargarListaCitas(filtros = {}) {
   const token = localStorage.getItem('token');
   const tbody = document.getElementById('citas-tbody');
@@ -49,12 +46,12 @@ export async function cargarListaCitas(filtros = {}) {
 
   try {
     const params = new URLSearchParams(filtros).toString();
-    const res = await fetch(`${API_URL}/citas${params ? '?' + params : ''}`, {
+    const res    = await fetch(`${API_URL}/citas${params ? '?' + params : ''}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!res.ok) throw new Error('Error al cargar citas');
 
-    const data = await res.json();
+    const data            = await res.json();
     estadoCitas.listaCitas = data.citas || [];
     renderizarTablaCitas(estadoCitas.listaCitas);
 
@@ -62,11 +59,11 @@ export async function cargarListaCitas(filtros = {}) {
     if (conteo) conteo.textContent = `${estadoCitas.listaCitas.length} registros`;
 
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Error al cargar citas: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:20px; text-align:center; color:red;">Error: ${err.message}</td></tr>`;
   }
 }
 
-// ── Render de tabla ───────────────────────────────────────────
+// ── Render tabla ──────────────────────────────────────────────
 function renderizarTablaCitas(lista) {
   const tbody = document.getElementById('citas-tbody');
   if (!tbody) return;
@@ -79,7 +76,7 @@ function renderizarTablaCitas(lista) {
   tbody.innerHTML = '';
   lista.forEach(cita => {
     const badge = getBadgeEstado(cita.estado);
-    const tr = document.createElement('tr');
+    const tr    = document.createElement('tr');
     tr.style.borderBottom = '1px solid #eef2f8';
     tr.style.transition    = 'background 0.2s';
     tr.addEventListener('mouseenter', () => tr.style.backgroundColor = '#f8fafc');
@@ -105,37 +102,34 @@ function renderizarTablaCitas(lista) {
       </td>
     `;
 
-    const btnConfirmar = tr.querySelector('.btn-confirmar');
-    const btnCancelar  = tr.querySelector('.btn-cancelar-cita');
-    if (btnConfirmar) btnConfirmar.addEventListener('click', () => cambiarEstadoCita(cita.id, 'CONFIRMADA'));
-    if (btnCancelar)  btnCancelar.addEventListener('click',  () => cambiarEstadoCita(cita.id, 'CANCELADA'));
+    tr.querySelector('.btn-confirmar')?.addEventListener('click',    () => cambiarEstadoCita(cita.id, 'CONFIRMADA'));
+    tr.querySelector('.btn-cancelar-cita')?.addEventListener('click', () => cambiarEstadoCita(cita.id, 'CANCELADA'));
 
     tbody.appendChild(tr);
   });
 }
 
-// ── Badge de estado ───────────────────────────────────────────
 function getBadgeEstado(estado) {
   const estilos = {
     PENDIENTE:  'background:#fefcbf; color:#744210;',
     CONFIRMADA: 'background:#c6f6d5; color:#22543d;',
     CANCELADA:  'background:#fed7d7; color:#822727;',
+    FINALIZADA: 'background:#e2e8f0; color:#4a5568;',
   };
   const estilo = estilos[estado] || 'background:#e2e8f0; color:#4a5568;';
   return `<span style="font-size:0.78rem; padding:3px 10px; border-radius:20px; font-weight:600; ${estilo}">${estado}</span>`;
 }
 
-// ── Cambiar estado de una cita ────────────────────────────────
 async function cambiarEstadoCita(id, nuevoEstado) {
-  const token = localStorage.getItem('token');
+  const token  = localStorage.getItem('token');
   const accion = nuevoEstado === 'CONFIRMADA' ? 'confirmar' : 'cancelar';
   if (!confirm(`¿Desea ${accion} la cita #${id}?`)) return;
 
   try {
     const res = await fetch(`${API_URL}/citas/update/${id}`, {
-      method: 'PUT',
+      method:  'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ estado: nuevoEstado })
+      body:    JSON.stringify({ estado: nuevoEstado })
     });
     if (!res.ok) throw new Error('No se pudo actualizar el estado');
     await cargarListaCitas();
@@ -144,33 +138,34 @@ async function cambiarEstadoCita(id, nuevoEstado) {
   }
 }
 
-// ── Filtros de búsqueda ───────────────────────────────────────
+// ── FILTROS: nombre y DPI ─────────────────────────────────────
 function initFiltros() {
   const btnFiltrar = document.getElementById('btn-filtrar-citas');
   const btnLimpiar = document.getElementById('btn-limpiar-filtros');
 
   if (btnFiltrar) {
     btnFiltrar.addEventListener('click', () => {
-      const doctorId   = document.getElementById('filtro-doctor-id')?.value;
-      const pacienteId = document.getElementById('filtro-paciente-id')?.value;
+      const nombre = document.getElementById('filtro-nombre-paciente')?.value.trim();
+      const dpi    = document.getElementById('filtro-dpi-paciente')?.value.trim();
       const filtros = {};
-      if (doctorId)   filtros.doctorId   = doctorId;
-      if (pacienteId) filtros.pacienteId = pacienteId;
+      if (nombre) filtros.nombre = nombre;
+      if (dpi)    filtros.dpi    = dpi;
       cargarListaCitas(filtros);
     });
   }
+
   if (btnLimpiar) {
     btnLimpiar.addEventListener('click', () => {
-      const fd = document.getElementById('filtro-doctor-id');
-      const fp = document.getElementById('filtro-paciente-id');
+      const fn = document.getElementById('filtro-nombre-paciente');
+      const fd = document.getElementById('filtro-dpi-paciente');
+      if (fn) fn.value = '';
       if (fd) fd.value = '';
-      if (fp) fp.value = '';
       cargarListaCitas();
     });
   }
 }
 
-// ── Poblar selectores del formulario nueva cita ───────────────
+// ── Poblar selectores nueva cita ──────────────────────────────
 async function poblarSelectoresCita() {
   const token = localStorage.getItem('token');
   try {
@@ -220,7 +215,6 @@ function initBuscadorDpi() {
       });
 
       if (res.ok) {
-        // Paciente encontrado — mostrar resumen y ocultar formulario de creación
         const paciente = await res.json();
         if (panel) panel.style.display = 'block';
         if (info)  info.innerHTML = `
@@ -233,7 +227,6 @@ function initBuscadorDpi() {
           </div>`;
         toggleFormularioPaciente(false);
       } else {
-        // No existe — habilitar campos de registro nuevo
         if (panel) panel.style.display = 'block';
         if (info)  info.innerHTML = `
           <div style="background:#fff5f5; border:1px solid #fc8181; border-radius:8px; padding:12px 16px;">
@@ -252,7 +245,7 @@ function toggleFormularioPaciente(mostrar) {
   if (campos) campos.style.display = mostrar ? 'grid' : 'none';
 }
 
-// ── Formulario nueva cita (registrarCitaCompleta) ─────────────
+// ── Formulario nueva cita ─────────────────────────────────────
 function initFormularioCita() {
   const form = document.getElementById('formulario-nueva-cita');
   if (!form) return;
@@ -272,31 +265,30 @@ function initFormularioCita() {
       return;
     }
 
-    // Construir payload según registrarCitaCompleta del backend
     const camposNuevos = document.getElementById('campos-nuevo-paciente');
-    const esNuevo = camposNuevos && camposNuevos.style.display !== 'none';
+    const esNuevo      = camposNuevos && camposNuevos.style.display !== 'none';
 
     const payload = {
       paciente: {
         dpi,
-        nombres:             esNuevo ? document.getElementById('pac-nombres')?.value : dpi,
-        apellidos:           esNuevo ? document.getElementById('pac-apellidos')?.value : '',
-        sexo:                esNuevo ? document.getElementById('pac-sexo')?.value : 'MASCULINO',
-        telefono:            esNuevo ? document.getElementById('pac-telefono')?.value : '',
-        email:               esNuevo ? document.getElementById('pac-email')?.value : '',
-        direccion:           esNuevo ? document.getElementById('pac-direccion')?.value : '',
-        contacto_emergencia: esNuevo ? document.getElementById('pac-contacto')?.value : '',
+        nombres:             esNuevo ? document.getElementById('pac-nombres')?.value    : dpi,
+        apellidos:           esNuevo ? document.getElementById('pac-apellidos')?.value  : '',
+        sexo:                esNuevo ? document.getElementById('pac-sexo')?.value       : 'MASCULINO',
+        telefono:            esNuevo ? document.getElementById('pac-telefono')?.value   : '',
+        email:               esNuevo ? document.getElementById('pac-email')?.value      : '',
+        direccion:           esNuevo ? document.getElementById('pac-direccion')?.value  : '',
+        contacto_emergencia: esNuevo ? document.getElementById('pac-contacto')?.value   : '',
         fecha_nacimiento:    esNuevo ? document.getElementById('pac-nacimiento')?.value : '2000-01-01',
       },
-      cita: { fecha, motivo, doctorId },
+      cita:   { fecha, motivo, doctorId },
       sedeId
     };
 
     try {
-      const res = await fetch(`${API_URL}/citas/registrar-completo`, {
-        method: 'POST',
+      const res  = await fetch(`${API_URL}/citas/registrar-completo`, {
+        method:  'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload)
+        body:    JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al registrar la cita');
