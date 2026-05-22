@@ -1,14 +1,9 @@
-/* ══════════════════════════════════════
-   js/menuFacturacion.js
-   Módulo de Facturación — Panel Secretaria
-══════════════════════════════════════ */
-
 import { API_URL } from './menuConfig.js';
 
 const estadoFac = {
   citaSeleccionada: null,
   pacienteSeleccionado: null,
-  ultimaFactura: null, // ← guardamos la última para poder descargarla
+  ultimaFactura: null,
 };
 
 export function initFacturacionModule() {

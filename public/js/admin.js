@@ -1,7 +1,7 @@
 import { verificarSesion, initLogout } from './menuAuth.js';
 import { initDoctorForm, initSedeForm, initEspecialidadForm, cargarSelectsFormulario } from './menuForms.js';
 import { initControlModule, cambiarContextoControl }from './menuControl.js';
-import { initAreaChart, initBarMiniChart, initMainBarChart, renderRanking } from './menuCharts.js';
+import { initDashboard, initAreaChart, initBarMiniChart } from './menuCharts.js';
 import { initUsuariosModule, cargarModuloUsuarios } from './menuUsuarios.js';
 import { API_URL }from './menuConfig.js';
 
@@ -21,8 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLogout();
   initAreaChart();
   initBarMiniChart();
-  initMainBarChart();
-  renderRanking();
+  initDashboard();
   cargarPacientes();
 });
 
@@ -54,15 +53,15 @@ function initRouter() {
       document.getElementById(sec)?.classList.add('active-view');
       if (pageTitle) pageTitle.textContent = titulo;
 
-      if (btnId === 'btn-nav-doctores')    cargarSelectsFormulario();
-      if (btnId === 'btn-nav-control')     cambiarContextoControl('doctores');
-      if (btnId === 'btn-nav-usuarios')    cargarModuloUsuarios();
-      if (btnId === 'btn-nav-pacientes')   cargarPacientes();
+      if (btnId === 'btn-nav-doctores')  cargarSelectsFormulario();
+      if (btnId === 'btn-nav-control')   cambiarContextoControl('doctores');
+      if (btnId === 'btn-nav-usuarios')  cargarModuloUsuarios();
+      if (btnId === 'btn-nav-pacientes') cargarPacientes();
+      if (btnId === 'btn-nav-dashboard') initDashboard();
     });
   });
 }
 
-// ── Cargar listado de pacientes ───────────────────────────────
 async function cargarPacientes() {
   const token = localStorage.getItem('token');
   const tbody = document.getElementById('pacientes-tbody');

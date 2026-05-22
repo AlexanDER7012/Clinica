@@ -17,47 +17,37 @@
     </div>
     <div class="logo-text">Clínica<span>Admin</span></div>
   </div>
-
   <nav class="nav">
     <div class="nav-label">Principal</div>
-
     <a id="btn-nav-dashboard" class="nav-item active" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
       Dashboard
     </a>
-
     <a id="btn-nav-doctores" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg>
       Doctores
     </a>
-
     <a id="btn-nav-sedes" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
       Sedes
     </a>
-
     <a id="btn-nav-pacientes" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm6 13H6v-.9c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/></svg>
       Pacientes
     </a>
-
     <div class="nav-label" style="margin-top:10px;">Gestión</div>
-
     <a id="btn-nav-usuarios" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
       Usuarios
     </a>
-
     <a id="btn-nav-excepciones" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
       Especialidades
     </a>
-
     <a id="btn-nav-control" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-10h-4v10zm6 0h4v-11h-4v11zm6 0h4v-7h-4v7zm-12 4h16v-2h-16v2z"/></svg>
       Control General
     </a>
-
     <a id="logoutBtn" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 0 0-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg>
       Cerrar Sesión
@@ -90,64 +80,64 @@
 
     <!-- ── DASHBOARD ─────────────────────────────────────────── -->
     <div id="sec-dashboard" class="view-section active-view">
+
+      <!-- Selector de sede -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px; background:white; padding:8px 16px; border-radius:8px; border:1px solid #eef2f8;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" style="width:16px; height:16px;"><path d="M12 7V3H2v18h20V7H12z"/></svg>
+          <label for="dashboard-sede-selector" style="font-size:0.85rem; color:#4a5568; font-weight:500;">Ver por sede:</label>
+          <select id="dashboard-sede-selector" style="border:none; background:transparent; font-family:inherit; font-size:0.9rem; color:#2d3748; cursor:pointer; outline:none;">
+            <option value="">Todas las Sedes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tarjetas con IDs para datos reales -->
       <div class="stat-grid">
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Ingresos Totales</span>
             <span class="stat-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
           </div>
-          <div class="stat-value">Q 154,430</div>
-          <div class="stat-meta">Semana &nbsp;<span class="up">↑ 13%</span></div>
-          <div class="stat-meta">Día &nbsp;<span class="down">↓ 10%</span></div>
-          <div class="stat-footer">Hoy Q 15,443</div>
+          <div class="stat-value" id="stat-ingresos">Cargando...</div>
+          <div class="stat-footer">Suma de facturas emitidas</div>
         </div>
+
         <div class="stat-card">
           <div class="stat-header">
-            <span class="stat-label">Visitas</span>
+            <span class="stat-label">Consultas</span>
             <span class="stat-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
           </div>
-          <div class="stat-value">6,480</div>
+          <div class="stat-value" id="stat-consultas">Cargando...</div>
           <div class="mini-chart-wrap"><canvas id="areaChart"></canvas></div>
-          <div class="stat-footer">Visitas hoy: 4,280</div>
+          <div class="stat-footer">Citas finalizadas</div>
         </div>
+
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Pagos</span>
             <span class="stat-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
           </div>
-          <div class="stat-value">5,320</div>
+          <div class="stat-value" id="stat-pagos">Cargando...</div>
           <div class="mini-chart-wrap"><canvas id="barMini"></canvas></div>
-          <div class="stat-footer">Tasa de conversión 50%</div>
+          <div class="stat-footer">Facturas emitidas</div>
         </div>
+
         <div class="stat-card stat-card--centered">
           <div class="stat-label">Eficiencia Operativa</div>
-          <div class="big-pct">88%</div>
-          <div class="big-label">Operación general</div>
+          <div class="big-pct" id="stat-eficiencia">—</div>
+          <div class="big-label">Citas confirmadas + finalizadas</div>
         </div>
       </div>
+
       <div class="bottom-grid">
         <div class="chart-card">
           <div class="chart-card-header">
-            <div class="chart-tabs">
-              <button class="chart-tab active">Consultas</button>
-              <button class="chart-tab">Visitas</button>
-            </div>
-            <div class="chart-controls">
-              <div class="time-filters">
-                <button class="tf">Hoy</button>
-                <button class="tf">Semana</button>
-                <button class="tf">Mes</button>
-                <button class="tf active">Año</button>
-              </div>
-              <div class="date-range">
-                <span>2026-01-01 ~ 2026-12-31</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-            </div>
+            <div class="chart-title" id="chart-titulo" style="font-weight:600; color:#2d3748;">Citas por Mes</div>
           </div>
-          <div class="chart-title">Tendencia de Consultas — Clínica</div>
           <div class="chart-wrap"><canvas id="mainBar"></canvas></div>
         </div>
+
         <div class="ranking-card">
           <div class="ranking-title">Ranking de Médicos</div>
           <div id="rankList"></div>
@@ -225,18 +215,9 @@
         <div class="admin-title" style="margin-bottom:20px;">Crear Nuevo Usuario del Sistema</div>
         <form id="formulario-usuario">
           <div class="form-grid">
-            <div class="form-group">
-              <label for="usuario-nombres">Nombre Completo</label>
-              <input type="text" id="usuario-nombres" class="form-control" placeholder="Ej. Ana García" required>
-            </div>
-            <div class="form-group">
-              <label for="usuario-email">Correo Electrónico</label>
-              <input type="email" id="usuario-email" class="form-control" placeholder="Ej. ana@clinica.com" required>
-            </div>
-            <div class="form-group">
-              <label for="usuario-password">Contraseña Inicial</label>
-              <input type="password" id="usuario-password" class="form-control" placeholder="Mínimo 8 caracteres" required>
-            </div>
+            <div class="form-group"><label for="usuario-nombres">Nombre Completo</label><input type="text" id="usuario-nombres" class="form-control" placeholder="Ej. Ana García" required></div>
+            <div class="form-group"><label for="usuario-email">Correo Electrónico</label><input type="email" id="usuario-email" class="form-control" placeholder="Ej. ana@clinica.com" required></div>
+            <div class="form-group"><label for="usuario-password">Contraseña Inicial</label><input type="password" id="usuario-password" class="form-control" placeholder="Mínimo 8 caracteres" required></div>
             <div class="form-group">
               <label for="usuario-rol">Rol en el Sistema</label>
               <select id="usuario-rol" class="form-control" required>
@@ -247,9 +228,7 @@
             </div>
             <div class="form-group" id="grupo-sede-usuario" style="display:none;">
               <label for="usuario-sedeId">Sede Asignada</label>
-              <select id="usuario-sedeId" class="form-control">
-                <option value="">-- Seleccione Sede --</option>
-              </select>
+              <select id="usuario-sedeId" class="form-control"><option value="">-- Seleccione Sede --</option></select>
             </div>
           </div>
           <div style="text-align:right; margin-top:16px;">
@@ -257,7 +236,6 @@
           </div>
         </form>
       </div>
-
       <div class="admin-card" style="padding:24px;">
         <div class="admin-title" style="margin-bottom:16px;">Usuarios Registrados</div>
         <div style="overflow-x:auto; border-radius:8px; border:1px solid #eef2f8;">

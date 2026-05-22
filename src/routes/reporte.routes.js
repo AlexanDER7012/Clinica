@@ -4,8 +4,8 @@ import { verificarToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-
-router.post("/generar", reporteController.generarReporteMensual);
+router.get("/stats",     verificarToken, reporteController.getDashboardData);  
+router.post("/generar",  reporteController.generarReporteMensual);
 router.get("/dashboard", reporteController.getReportesBySede);
 
 export default router;
