@@ -3,50 +3,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica Proyecto 1 - Login</title>
+    <title>Clínica Médica Integral — Acceso</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        .content.second-content {
-            display: flex !important;
-            position: relative !important;
-            opacity: 1 !important;
-            z-index: 10;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --verde:      #1a7a5e;
+            --verde-claro:#2aa87f;
+            --verde-pale: #e8f5f1;
+            --azul:       #1a365d;
+            --azul-medio: #2d5a8e;
+            --blanco:     #fafdf9;
+            --gris:       #6b7c93;
+            --sombra:     rgba(26,122,94,0.18);
         }
-        .first-content { display: none; } 
+
+        body {
+            min-height: 100vh;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--blanco);
+            display: flex;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+        /* ── Panel izquierdo ── */
+        .panel-izq {
+            width: 52%;
+            background: linear-gradient(145deg, var(--azul) 0%, #1e4d7b 40%, var(--verde) 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 64px;
+            overflow: hidden;
+        }
+
+        /* Cruz médica decorativa grande */
+        .panel-izq::before {
+            content: '+';
+            position: absolute;
+            right: -40px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 420px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.04);
+            line-height: 1;
+            pointer-events: none;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Círculo decorativo */
+        .panel-izq::after {
+            content: '';
+            position: absolute;
+            bottom: -120px;
+            left: -80px;
+            width: 380px;
+            height: 380px;
+            border-radius: 50%;
+            background: rgba(42,168,127,0.12);
+            pointer-events: none;
+        }
+
+        .badge-clinica {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            padding: 8px 18px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(8px);
+        }
+
+        .badge-clinica .cruz {
+            width: 22px;
+            height: 22px;
+            background: var(--verde-claro);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .badge-clinica span {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.82rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .panel-izq h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-izq h1 em {
+            font-style: normal;
+            color: #7ee8c8;
+        }
+
+        .panel-izq p {
+            color: rgba(255,255,255,0.65);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 380px;
+            margin-bottom: 48px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-portal {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            color: var(--verde);
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .btn-portal:hover {
+            background: var(--verde-claro);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+        }
+
+        .btn-portal .arrow {
+            width: 32px;
+            height: 32px;
+            background: var(--verde-pale);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            font-size: 0.85rem;
+            color: var(--verde);
+        }
+
+        .btn-portal:hover .arrow {
+            background: rgba(255,255,255,0.25);
+            color: white;
+        }
+
+        /* Stats decorativos */
+        .stats-row {
+            display: flex;
+            gap: 32px;
+            margin-top: 56px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-item .num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+        }
+
+        .stat-item .lbl {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 4px;
+        }
+
+        .stat-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.15);
+            align-self: stretch;
+        }
+
+        /* ── Panel derecho ── */
+        .panel-der {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 56px;
+            background: var(--blanco);
+            position: relative;
+        }
+
+        /* Patrón de puntos sutil */
+        .panel-der::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, #c8e6dc 1px, transparent 1px);
+            background-size: 28px 28px;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .form-wrap {
+            width: 100%;
+            max-width: 380px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+        }
+
+        .form-header .tag {
+            display: inline-block;
+            background: var(--verde-pale);
+            color: var(--verde);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 5px 14px;
+            border-radius: 50px;
+            margin-bottom: 16px;
+        }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--azul);
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: var(--gris);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--azul);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gris);
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid #e2ece8;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            color: var(--azul);
+            background: white;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--verde-claro);
+            box-shadow: 0 0 0 4px rgba(42,168,127,0.1);
+        }
+
+        .input-wrap input:focus + i,
+        .input-wrap input:focus ~ i {
+            color: var(--verde-claro);
+        }
+
+        .input-wrap input:focus ~ .input-wrap i {
+            color: var(--verde-claro);
+        }
+
+        /* Fix: icono cambia con focus del input */
+        .input-wrap:focus-within i {
+            color: var(--verde-claro);
+        }
+
+        .forgot {
+            display: block;
+            text-align: right;
+            font-size: 0.82rem;
+            color: var(--gris);
+            text-decoration: none;
+            margin-top: -10px;
+            margin-bottom: 28px;
+            transition: color 0.2s;
+        }
+
+        .forgot:hover { color: var(--verde); }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--verde) 0%, var(--verde-claro) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px var(--sombra);
+            letter-spacing: 0.02em;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 32px var(--sombra);
+        }
+
+        .btn-login:active { transform: translateY(0); }
+
+        .form-footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e8f0ec;
+            text-align: center;
+        }
+
+        .form-footer p {
+            font-size: 0.82rem;
+            color: var(--gris);
+        }
+
+        .form-footer .sedes {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .sede-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--verde);
+            font-weight: 500;
+        }
+
+        .sede-tag::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--verde-claro);
+            border-radius: 50%;
+        }
+
+        /* ── Animaciones ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0);    }
+        }
+
+        .panel-izq > * { animation: fadeUp 0.6s ease both; }
+        .panel-izq > *:nth-child(1) { animation-delay: 0.1s; }
+        .panel-izq > *:nth-child(2) { animation-delay: 0.2s; }
+        .panel-izq > *:nth-child(3) { animation-delay: 0.3s; }
+        .panel-izq > *:nth-child(4) { animation-delay: 0.4s; }
+        .panel-izq > *:nth-child(5) { animation-delay: 0.5s; }
+
+        .form-wrap { animation: fadeUp 0.7s 0.2s ease both; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            .panel-izq, .panel-der { width: 100%; padding: 40px 28px; }
+            .panel-izq { min-height: 50vh; }
+            .panel-izq h1 { font-size: 2.2rem; }
+            .stats-row { gap: 20px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="content second-content">
-            <div class="first-column">
-                <h2 class="title title-primary">¿Eres Paciente?</h2>
-                <p class="description description-primary">Gestiona tus citas de forma rápida</p>
-                <p class="description description-primary">en nuestras sedes de Antigua o Petén.</p>
-                <a href="portal.html" class="btn btn-primary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; margin-top: 20px;">
-                    Agendar Cita
-                </a>
+
+    <!-- ── Panel izquierdo: Bienvenida ── -->
+    <div class="panel-izq">
+        <div class="badge-clinica">
+            <div class="cruz">+</div>
+            <span>Clínica Médica Integral</span>
+        </div>
+
+        <h1>Salud de <em>calidad</em><br>al alcance<br>de todos.</h1>
+
+        <p>Atención médica especializada en las sedes de Antigua Guatemala y Petén. Reserve su cita en segundos.</p>
+
+        <a href="portal.html" class="btn-portal">
+            Soy Paciente — Agendar Cita
+            <div class="arrow"><i class="fas fa-arrow-right"></i></div>
+        </a>
+
+        <div class="stats-row">
+            <div class="stat-item">
+                <span class="num">2</span>
+                <span class="lbl">Sedes</span>
             </div>
-            
-            <div class="second-column">
-                <h2 class="title title-second">Iniciar Sesión</h2>
-                <p class="description description-second">Acceso para personal médico y administrativo:</p>
-                <form class="form" id="loginForm">
-                    <label class="label-input">
-                        <i class="far fa-envelope icon-modify"></i>
-                        <input type="email" id="loginEmail" placeholder="Email" required>
-                    </label>
-                    <label class="label-input">
-                        <i class="fas fa-lock icon-modify"></i>
-                        <input type="password" id="loginPassword" placeholder="Password" required>
-                    </label>
-                    <a class="password" href="#">¿Olvidaste tu contraseña?</a>
-                    <button type="submit" class="btn btn-second">Entrar al Sistema</button>
-                </form>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="num">10+</span>
+                <span class="lbl">Especialistas</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="num">5</span>
+                <span class="lbl">Especialidades</span>
             </div>
         </div>
     </div>
 
-    <script src="js/auth.js"></script> 
+    <!-- ── Panel derecho: Login ── -->
+    <div class="panel-der">
+        <div class="form-wrap">
+            <div class="form-header">
+                <span class="tag">Portal Interno</span>
+                <h2>Iniciar<br>Sesión</h2>
+                <p>Acceso exclusivo para personal médico y administrativo.</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico</label>
+                    <div class="input-wrap">
+                        <input type="email" id="loginEmail" placeholder="usuario@clinica.com" required>
+                        <i class="far fa-envelope"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <div class="input-wrap">
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+
+                <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
+
+                <button type="submit" class="btn-login">
+                    Entrar al Sistema
+                </button>
+            </form>
+
+            <div class="form-footer">
+                <p>Sistema de Gestión — Clínica Médica Integral</p>
+                <div class="sedes">
+                    <span class="sede-tag">Antigua Guatemala</span>
+                    <span class="sede-tag">Flores, Petén</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
 </body>
 </html>

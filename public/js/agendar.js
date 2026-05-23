@@ -1,13 +1,13 @@
 const API_URL = 'http://localhost:3000';
 
-const urlParams = new URLSearchParams(window.location.search);
+const urlParams    = new URLSearchParams(window.location.search);
 const sedeActualId = urlParams.get('sedeId');
 
-const formulario = document.querySelector('#formulario-cita');
+const formulario        = document.querySelector('#formulario-cita');
 const especialidadSelect = document.querySelector('#especialidad');
-const doctorSelect = document.querySelector('#doctor');
-const sedeLabel = document.querySelector('#sede-label');
-const contenedorCitas = document.querySelector('#contenedor-citas');
+const doctorSelect       = document.querySelector('#doctor');
+const sedeLabel          = document.querySelector('#sede-label');
+const contenedorCitas    = document.querySelector('#contenedor-citas');
 
 function crearObjetoLimpio() {
   return { 
@@ -19,6 +19,97 @@ function crearObjetoLimpio() {
 
 let citaObj = crearObjetoLimpio();
 
+// ── Validadores ───────────────────────────────────────────────
+const validaciones = {
+  dpi: {
+    regex:   /^\d{13}$/,
+    mensaje: 'El DPI debe tener exactamente 13 dígitos numéricos.'
+  },
+  nombres: {
+    regex:   /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/,
+    mensaje: 'El nombre solo debe contener letras.'
+  },
+  apellidos: {
+    regex:   /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$/,
+    mensaje: 'Los apellidos solo deben contener letras.'
+  },
+  telefono: {
+    regex:   /^\d{8}$/,
+    mensaje: 'El teléfono debe tener exactamente 8 dígitos.'
+  },
+  email: {
+    regex:   /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    mensaje: 'Ingrese un correo electrónico válido.'
+  },
+};
+
+function mostrarError(campo, mensaje) {
+  const input   = document.getElementById(campo);
+  if (!input) return;
+  let errorEl = document.getElementById(`error-${campo}`);
+  if (!errorEl) {
+    errorEl           = document.createElement('p');
+    errorEl.id        = `error-${campo}`;
+    errorEl.style.cssText = 'color:#e53e3e; font-size:0.78rem; margin:4px 0 0;';
+    input.parentNode.appendChild(errorEl);
+  }
+  errorEl.textContent = mensaje;
+  input.style.borderColor = '#e53e3e';
+}
+
+function limpiarError(campo) {
+  const input   = document.getElementById(campo);
+  const errorEl = document.getElementById(`error-${campo}`);
+  if (errorEl) errorEl.textContent = '';
+  if (input)   input.style.borderColor = '';
+}
+
+function validarCampo(id, valor) {
+  if (!validaciones[id]) return true;
+  const { regex, mensaje } = validaciones[id];
+  if (!regex.test(valor.trim())) {
+    mostrarError(id, mensaje);
+    return false;
+  }
+  limpiarError(id);
+  return true;
+}
+
+// ── Restricciones de teclado en tiempo real ───────────────────
+function initRestriccionesTeclado() {
+  // Solo letras
+  ['nombres', 'apellidos'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]/g, '');
+      if (citaObj[id] !== undefined) citaObj[id] = el.value;
+    });
+  });
+
+  // Solo números — DPI (máx 13)
+  const dpiEl = document.getElementById('dpi');
+  if (dpiEl) {
+    dpiEl.setAttribute('maxlength', '13');
+    dpiEl.addEventListener('input', () => {
+      dpiEl.value = dpiEl.value.replace(/\D/g, '').slice(0, 13);
+      citaObj.dpi = dpiEl.value;
+      if (dpiEl.value.length === 13) limpiarError('dpi');
+      else if (dpiEl.value.length > 0) mostrarError('dpi', `${dpiEl.value.length}/13 dígitos`);
+    });
+  }
+
+  // Solo números — teléfono (máx 8)
+  const telEl = document.getElementById('telefono');
+  if (telEl) {
+    telEl.setAttribute('maxlength', '8');
+    telEl.addEventListener('input', () => {
+      telEl.value    = telEl.value.replace(/\D/g, '').slice(0, 8);
+      citaObj.telefono = telEl.value;
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!sedeActualId) {
     alert("Error: No se seleccionó una sede.");
@@ -26,26 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  sedeLabel.textContent = `Sede: ${sedeActualId == 1 ? 'Antigua Guatemala' : 'Petén'}`;
+  sedeLabel.textContent = sedeActualId == 1 ? 'Sede Antigua Guatemala' : 'Sede Flores, Petén';
 
   cargarEspecialidades();
+  initRestriccionesTeclado();
 
-  // Listener general para todos los inputs de texto
   formulario.addEventListener('input', e => {
-    if (e.target.id in citaObj) {
-      citaObj[e.target.id] = e.target.value;
-    }
+    if (e.target.id in citaObj) citaObj[e.target.id] = e.target.value;
   });
 
   formulario.addEventListener('change', e => {
-    if (e.target.id in citaObj) {
-      citaObj[e.target.id] = e.target.value;
-    }
+    if (e.target.id in citaObj) citaObj[e.target.id] = e.target.value;
   });
 
   especialidadSelect.addEventListener('change', e => {
     citaObj.especialidad = e.target.value;
-    citaObj.doctorId = ''; 
+    citaObj.doctorId     = '';
     cargarDoctores(e.target.value);
   });
 
@@ -66,18 +153,25 @@ async function submitCita(e) {
     return new Notificacion(`Faltan campos: ${faltantes.join(', ')}`, 'error');
   }
 
+  // ── Validar todos los campos con reglas ───────────────────
+  let hayErrores = false;
+  ['dpi', 'nombres', 'apellidos', 'telefono', 'email'].forEach(campo => {
+    if (!validarCampo(campo, citaObj[campo])) hayErrores = true;
+  });
+  if (hayErrores) return new Notificacion('Corrija los campos marcados en rojo.', 'error');
+
   try {
     const payload = {
       paciente: {
-        nombres: citaObj.nombres,
-        apellidos:citaObj.apellidos,
-        dpi: citaObj.dpi,
-        sexo: citaObj.sexo,
-        telefono: citaObj.telefono,
-        email: citaObj.email,
-        direccion: citaObj.direccion,
-        fecha_nacimiento: citaObj.fecha_nacimiento,
-        contacto_emergencia:citaObj.contacto_emergencia
+        nombres:             citaObj.nombres,
+        apellidos:           citaObj.apellidos,
+        dpi:                 citaObj.dpi,
+        sexo:                citaObj.sexo,
+        telefono:            citaObj.telefono,
+        email:               citaObj.email,
+        direccion:           citaObj.direccion,
+        fecha_nacimiento:    citaObj.fecha_nacimiento,
+        contacto_emergencia: citaObj.contacto_emergencia
       },
       cita: {
         fecha:    citaObj.fecha,
@@ -88,9 +182,9 @@ async function submitCita(e) {
     };
 
     const res = await fetch(`${API_URL}/citas/registrar-completo`, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body:    JSON.stringify(payload)
     });
 
     const resultado = await res.json();
@@ -99,12 +193,24 @@ async function submitCita(e) {
     new Notificacion('¡Cita registrada con éxito!', 'exito');
     mostrarCitaHTML(resultado);
 
-    formulario.reset();
-    citaObj = crearObjetoLimpio(); 
+    // ── Enviar correo si el email es Gmail ────────────────────
+    if (citaObj.email && citaObj.email.toLowerCase().endsWith('@gmail.com')) {
+      try {
+        await fetch(`${API_URL}/correo/cita-publica/${resultado.id_cita}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (correoErr) {
+        console.warn('Correo no enviado:', correoErr.message);
+      }
+    }
 
-    especialidadSelect.value = '';
-    doctorSelect.innerHTML = '<option value="">-- Seleccione Doctor --</option>';
-    doctorSelect.disabled = true;
+    formulario.reset();
+    citaObj = crearObjetoLimpio();
+
+    especialidadSelect.value  = '';
+    doctorSelect.innerHTML    = '<option value="">-- Seleccione Doctor --</option>';
+    doctorSelect.disabled     = true;
 
   } catch (error) {
     new Notificacion(error.message, 'error');
@@ -112,36 +218,38 @@ async function submitCita(e) {
 }
 
 function mostrarCitaHTML(cita) {
-
-  const msgVacio = contenedorCitas.querySelector('p');
-  if (msgVacio) msgVacio.remove();
-
-  const divCita = document.createElement('div');
-  divCita.classList.add(
-    'mx-5', 'my-5', 'bg-white', 'shadow-md',
-    'px-5', 'py-10', 'rounded-xl', 'border-l-4', 'border-indigo-500'
-  );
+  // Quitar estado vacío si existe
+  const emptyState = contenedorCitas.querySelector('.empty-state');
+  if (emptyState) emptyState.remove();
 
   const fechaFormateada = new Intl.DateTimeFormat('es-GT', {
     dateStyle: 'medium',
     timeStyle: 'short',
-    timeZone: 'America/Guatemala'
+    timeZone:  'America/Guatemala'
   }).format(new Date(cita.fecha));
 
+  const divCita = document.createElement('div');
+  divCita.className = 'cita-card';
   divCita.innerHTML = `
-    <p class="font-bold uppercase text-gray-700 mb-2">Paciente: 
-      <span class="font-normal normal-case">${cita.paciente.nombres} ${cita.paciente.apellidos}</span>
-    </p>
-    <p class="font-bold uppercase text-gray-700 mb-2">Doctor: 
-      <span class="font-normal normal-case">${cita.doctor.nombres}</span>
-    </p>
-    <p class="font-bold uppercase text-gray-700 mb-2">Fecha: 
-      <span class="font-normal normal-case">${fechaFormateada}</span>
-    </p>
-    <button 
-      onclick="eliminarCita(${cita.id_cita}, this.parentElement)" 
-      class="mt-4 bg-red-600 text-white px-4 py-2 rounded uppercase font-bold text-xs hover:bg-red-700">
-      Eliminar
+    <div class="cita-badge">Cita Registrada</div>
+    <div class="cita-row">
+      <span class="lbl">Paciente</span>
+      <span class="val">${cita.paciente.nombres} ${cita.paciente.apellidos}</span>
+    </div>
+    <div class="cita-row">
+      <span class="lbl">Médico</span>
+      <span class="val">${cita.doctor.nombres}</span>
+    </div>
+    <div class="cita-row">
+      <span class="lbl">Fecha</span>
+      <span class="val">${fechaFormateada}</span>
+    </div>
+    <div class="cita-row">
+      <span class="lbl">Sede</span>
+      <span class="val">${cita.sede?.nombre || '—'}</span>
+    </div>
+    <button class="btn-eliminar" onclick="eliminarCita(${cita.id_cita}, this.parentElement)">
+      🗑 Eliminar cita
     </button>
   `;
   contenedorCitas.appendChild(divCita);
@@ -149,12 +257,12 @@ function mostrarCitaHTML(cita) {
 
 async function cargarEspecialidades() {
   try {
-    const res = await fetch(`${API_URL}/especialidades`);
+    const res            = await fetch(`${API_URL}/especialidades`);
     const especialidades = await res.json();
     especialidadSelect.innerHTML = '<option value="">-- Seleccione Especialidad --</option>';
     especialidades.forEach(esp => {
-      const option = document.createElement('option');
-      option.value = esp.id_especialidad;
+      const option       = document.createElement('option');
+      option.value       = esp.id_especialidad;
       option.textContent = esp.nombre;
       especialidadSelect.appendChild(option);
     });
@@ -165,13 +273,12 @@ async function cargarEspecialidades() {
 
 async function cargarDoctores(espId) {
   doctorSelect.innerHTML = '<option value="">-- Seleccione Doctor --</option>';
-  doctorSelect.disabled = true;
-
+  doctorSelect.disabled  = true;
   if (!espId) return;
 
   try {
-    const res = await fetch(`${API_URL}/doctores`);
-    const data = await res.json();
+    const res      = await fetch(`${API_URL}/doctores`);
+    const data     = await res.json();
     const filtrados = data.filter(d => d.especialidadId == espId && d.sedeId == sedeActualId);
 
     if (filtrados.length === 0) {
@@ -180,8 +287,8 @@ async function cargarDoctores(espId) {
     }
 
     filtrados.forEach(d => {
-      const option = document.createElement('option');
-      option.value = d.id_doctor;
+      const option       = document.createElement('option');
+      option.value       = d.id_doctor;
       option.textContent = d.nombres;
       doctorSelect.appendChild(option);
     });
@@ -207,19 +314,14 @@ async function eliminarCita(id, elemento) {
 
 class Notificacion {
   constructor(texto, tipo) {
-    document.querySelector('.alert')?.remove();
+    const contenedor = document.getElementById('alerta-container');
+    if (!contenedor) return;
 
-    const alerta = document.createElement('div');
-    alerta.classList.add(
-      'text-center', 'w-full', 'p-3', 'text-white',
-      'my-5', 'alert', 'uppercase', 'font-bold', 'rounded-md'
-    );
-    tipo === 'error'
-      ? alerta.classList.add('bg-red-500')
-      : alerta.classList.add('bg-green-500');
-
+    contenedor.innerHTML = '';
+    const alerta       = document.createElement('div');
+    alerta.className   = `alerta ${tipo === 'error' ? 'alerta-error' : 'alerta-exito'}`;
     alerta.textContent = texto;
-    formulario.parentElement.insertBefore(alerta, formulario);
-    setTimeout(() => alerta.remove(), 3000);
+    contenedor.appendChild(alerta);
+    setTimeout(() => alerta.remove(), 4000);
   }
 }

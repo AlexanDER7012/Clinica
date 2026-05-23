@@ -1,3 +1,8 @@
+/* ══════════════════════════════════════
+   js/menuCitas.js
+   Módulo de Gestión de Citas — Panel Secretaria
+══════════════════════════════════════ */
+
 import { API_URL } from './menuConfig.js';
 
 const estadoCitas = {
@@ -95,16 +100,28 @@ function renderizarTablaCitas(lista) {
             style="background:#f6ad55; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500; margin-right:4px;">
             Reprogramar
           </button>
+          <button class="btn-correo" data-id="${cita.id}"
+            style="background:#805ad5; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500; margin-right:4px;">
+            ✉ Correo
+          </button>
           <button class="btn-cancelar-cita" data-id="${cita.id}"
             style="background:#fc8181; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500;">
             Cancelar
-          </button>` : '—'}
+          </button>` 
+        : cita.estado === 'CONFIRMADA' ? `
+          <button class="btn-correo" data-id="${cita.id}"
+            style="background:#805ad5; color:white; border:none; padding:4px 9px; border-radius:4px; font-size:0.78rem; cursor:pointer; font-weight:500;">
+            ✉ Correo
+          </button>` 
+        : '—'}
       </td>
     `;
 
     tr.querySelector('.btn-confirmar')?.addEventListener('click',     () => cambiarEstadoCita(cita.id, 'CONFIRMADA'));
     tr.querySelector('.btn-cancelar-cita')?.addEventListener('click', () => cambiarEstadoCita(cita.id, 'CANCELADA'));
     tr.querySelector('.btn-reprogramar')?.addEventListener('click',   () => abrirModalReprogramar(cita));
+    tr.querySelector('.btn-enviar-correo')?.addEventListener('click', () => enviarCorreo(cita.id));
+    tr.querySelector('.btn-correo')?.addEventListener('click',        () => enviarCorreoCita(cita.id, cita.paciente));
 
     tbody.appendChild(tr);
   });
@@ -163,6 +180,24 @@ function initFiltros() {
       if (fd) fd.value = '';
       cargarListaCitas();
     });
+  }
+}
+
+// ── Enviar correo ────────────────────────────────────────────
+async function enviarCorreoCita(id, paciente) {
+  const token = localStorage.getItem('token');
+  if (!confirm(`¿Enviar correo de notificación a ${paciente}?`)) return;
+
+  try {
+    const res  = await fetch(`${API_URL}/correo/cita/${id}`, {
+      method:  'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al enviar correo');
+    alert(`✉ ${data.mensaje}`);
+  } catch (err) {
+    alert(`Error: ${err.message}`);
   }
 }
 
@@ -355,7 +390,9 @@ function initBuscadorDpi() {
       });
 
       if (res.ok) {
-        const paciente = await res.json();
+        const paciente     = await res.json();
+        pacienteBuscado    = true;
+        pacienteEncontrado = true;
         if (panel) panel.style.display = 'block';
         if (info) info.innerHTML = `
           <div style="background:#f0fff4; border:1px solid #9ae6b4; border-radius:8px; padding:12px 16px;">
@@ -367,6 +404,8 @@ function initBuscadorDpi() {
           </div>`;
         toggleFormularioPaciente(false);
       } else {
+        pacienteBuscado    = true;
+        pacienteEncontrado = false;
         if (panel) panel.style.display = 'block';
         if (info) info.innerHTML = `
           <div style="background:#fff5f5; border:1px solid #fc8181; border-radius:8px; padding:12px 16px;">
@@ -386,6 +425,10 @@ function toggleFormularioPaciente(mostrar) {
 }
 
 // ── Formulario nueva cita ─────────────────────────────────────
+// Estado para saber si el paciente fue buscado y encontrado/registrado
+let pacienteBuscado    = false;
+let pacienteEncontrado = false;
+
 function initFormularioCita() {
   const form = document.getElementById('formulario-nueva-cita');
   if (!form) return;
@@ -399,6 +442,13 @@ function initFormularioCita() {
     const fecha    = document.getElementById('cita-fecha')?.value;
     const motivo   = document.getElementById('cita-motivo')?.value;
 
+    // ── Validar que se haya buscado el DPI primero ────────────
+    if (!pacienteBuscado) {
+      alert('Debe buscar el DPI del paciente antes de registrar la cita.');
+      document.getElementById('cita-dpi')?.focus();
+      return;
+    }
+
     if (!dpi || !doctorId || !sedeId || !fecha) {
       alert('Complete todos los campos obligatorios.');
       return;
@@ -407,10 +457,43 @@ function initFormularioCita() {
     const camposNuevos = document.getElementById('campos-nuevo-paciente');
     const esNuevo      = camposNuevos && camposNuevos.style.display !== 'none';
 
+    // ── Si es nuevo paciente validar campos requeridos ────────
+    if (esNuevo) {
+      const nombres  = document.getElementById('pac-nombres')?.value.trim();
+      const apellidos = document.getElementById('pac-apellidos')?.value.trim();
+      const telefono = document.getElementById('pac-telefono')?.value.trim();
+      const email    = document.getElementById('pac-email')?.value.trim();
+      const direccion = document.getElementById('pac-direccion')?.value.trim();
+      const nacimiento = document.getElementById('pac-nacimiento')?.value;
+
+      if (!nombres || !apellidos || !telefono || !email || !direccion || !nacimiento) {
+        alert('Complete todos los datos del nuevo paciente.');
+        return;
+      }
+    }
+
+    // ── Confirmación antes de registrar ──────────────────────
+    const nombrePaciente = pacienteEncontrado
+      ? document.getElementById('info-paciente-encontrado')?.querySelector('strong')?.textContent
+      : `${document.getElementById('pac-nombres')?.value} ${document.getElementById('pac-apellidos')?.value}`;
+
+    const confirmado = confirm(
+      `¿Confirma registrar la cita para:
+
+` +
+      `Paciente: ${nombrePaciente}
+` +
+      `DPI: ${dpi}
+
+` +
+      `¿Desea continuar?`
+    );
+    if (!confirmado) return;
+
     const payload = {
       paciente: {
         dpi,
-        nombres:             esNuevo ? document.getElementById('pac-nombres')?.value    : dpi,
+        nombres:             esNuevo ? document.getElementById('pac-nombres')?.value    : '',
         apellidos:           esNuevo ? document.getElementById('pac-apellidos')?.value  : '',
         sexo:                esNuevo ? document.getElementById('pac-sexo')?.value       : 'MASCULINO',
         telefono:            esNuevo ? document.getElementById('pac-telefono')?.value   : '',
@@ -433,7 +516,26 @@ function initFormularioCita() {
       if (!res.ok) throw new Error(data.error || 'Error al registrar la cita');
 
       alert('¡Cita registrada exitosamente!');
+
+      // ── Enviar correo si el email es Gmail ────────────────
+      const emailPaciente = data.paciente?.email || '';
+      if (emailPaciente.toLowerCase().endsWith('@gmail.com')) {
+        try {
+          await fetch(`${API_URL}/correo/cita/${data.id_cita}`, {
+            method:  'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+        } catch (correoErr) {
+          console.warn('Correo no enviado:', correoErr.message);
+        }
+      }
+
       form.reset();
+
+      // Reset estado de búsqueda
+      pacienteBuscado    = false;
+      pacienteEncontrado = false;
+
       await poblarSelectoresCita();
       toggleFormularioPaciente(false);
       const panel = document.getElementById('panel-datos-paciente');
@@ -446,4 +548,22 @@ function initFormularioCita() {
       alert(`Error: ${err.message}`);
     }
   });
+}
+
+// ── Enviar correo al paciente ─────────────────────────────────
+async function enviarCorreo(id) {
+  const token = localStorage.getItem('token');
+  if (!confirm(`¿Desea enviar el correo de notificación al paciente de la cita #${id}?`)) return;
+
+  try {
+    const res  = await fetch(`${API_URL}/correo/cita/${id}`, {
+      method:  'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error al enviar correo');
+    alert(`✉ ${data.mensaje}`);
+  } catch (err) {
+    alert(`Error: ${err.message}`);
+  }
 }

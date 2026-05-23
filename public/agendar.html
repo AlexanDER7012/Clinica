@@ -3,103 +3,431 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica - Agendar Cita</title>
+    <title>Clínica Médica Integral — Agendar Cita</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; }
+
+        :root {
+            --verde:       #1a7a5e;
+            --verde-claro: #2aa87f;
+            --verde-pale:  #e8f5f1;
+            --azul:        #1a365d;
+            --azul-medio:  #2d5a8e;
+            --gris:        #6b7c93;
+        }
+
+        /* ── Encabezado ── */
+        .header-bar {
+            background: linear-gradient(135deg, var(--azul) 0%, #1e4d7b 50%, var(--verde) 100%);
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .header-cruz {
+            width: 36px; height: 36px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 700; color: #7ee8c8;
+        }
+        .header-brand span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem; font-weight: 600; color: white;
+        }
+        .header-sede {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            padding: 6px 16px;
+        }
+        .header-sede .dot {
+            width: 8px; height: 8px;
+            background: #7ee8c8;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.4; }
+        }
+        .header-sede span {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.82rem; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        #sede-label { color: rgba(255,255,255,0.85); font-size: 0.82rem; font-weight:500; }
+
+        /* ── Hero strip ── */
+        .hero-strip {
+            background: var(--verde-pale);
+            border-bottom: 1px solid #c8e6dc;
+            padding: 28px 40px;
+            display: flex; align-items: center; gap: 16px;
+        }
+        .hero-strip .icon-wrap {
+            width: 52px; height: 52px;
+            background: white;
+            border: 2px solid #c8e6dc;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
+        }
+        .hero-strip h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem; font-weight: 700;
+            color: var(--azul); line-height: 1.2;
+        }
+        .hero-strip p { color: var(--gris); font-size: 0.88rem; margin-top: 2px; }
+
+        /* ── Layout principal ── */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: calc(100vh - 130px);
+        }
+
+        /* ── Panel formulario ── */
+        .form-panel {
+            padding: 36px 40px;
+            border-right: 1px solid #e2ece8;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--verde); margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title::after {
+            content: ''; flex: 1; height: 1px;
+            background: #c8e6dc;
+        }
+
+        .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .field-full  { margin-bottom: 14px; }
+
+        label.field-label {
+            display: block;
+            font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--azul); margin-bottom: 6px;
+        }
+
+        input[type=text], input[type=tel], input[type=email],
+        input[type=date], input[type=datetime-local],
+        select, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #d4e8e0;
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--azul);
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--verde-claro);
+            box-shadow: 0 0 0 3px rgba(42,168,127,0.12);
+        }
+        input.error-field { border-color: #e53e3e !important; }
+        .error-msg { color: #e53e3e; font-size: 0.73rem; margin-top: 4px; }
+
+        textarea { resize: vertical; min-height: 80px; }
+        select:disabled { background: #f4f4f4; color: #aaa; cursor: not-allowed; }
+
+        .divider {
+            border: none; border-top: 1.5px dashed #c8e6dc;
+            margin: 20px 0;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--verde) 0%, var(--verde-claro) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(26,122,94,0.25);
+        }
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(26,122,94,0.3);
+        }
+
+        /* ── Panel citas agendadas ── */
+        .citas-panel {
+            padding: 36px 40px;
+            background: #f8fdfb;
+            overflow-y: auto;
+        }
+
+        .citas-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .citas-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem; font-weight: 700; color: var(--azul);
+        }
+        .citas-count {
+            background: var(--verde-pale);
+            color: var(--verde);
+            font-size: 0.75rem; font-weight: 600;
+            padding: 4px 12px; border-radius: 50px;
+        }
+
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--gris);
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* Tarjeta de cita */
+        .cita-card {
+            background: white;
+            border: 1px solid #d4e8e0;
+            border-left: 4px solid var(--verde-claro);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            animation: slideIn 0.4s ease both;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .cita-card .cita-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--verde-pale); color: var(--verde);
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            padding: 3px 10px; border-radius: 50px;
+            margin-bottom: 12px;
+        }
+        .cita-card .cita-badge::before {
+            content: ''; width: 6px; height: 6px;
+            background: var(--verde-claro); border-radius: 50%;
+        }
+        .cita-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            margin-bottom: 8px;
+        }
+        .cita-row .lbl {
+            font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--gris); min-width: 70px; padding-top: 1px;
+        }
+        .cita-row .val {
+            font-size: 0.9rem; color: var(--azul); font-weight: 500;
+        }
+        .btn-eliminar {
+            margin-top: 14px;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #fff5f5; color: #c53030;
+            border: 1px solid #feb2b2;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.78rem; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-eliminar:hover { background: #e53e3e; color: white; border-color: #e53e3e; }
+
+        /* Alerta */
+        .alerta {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600; font-size: 0.88rem;
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .alerta-error   { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+        .alerta-exito   { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; }
+
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .form-panel, .citas-panel { padding: 24px 20px; }
+            .header-bar { padding: 14px 20px; }
+            .hero-strip { padding: 20px; }
+            .citas-panel { border-top: 2px solid #c8e6dc; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <div class="container mx-auto py-10">
-        <h1 class="text-4xl font-black text-center mb-5">Agendar <span class="text-indigo-600">Cita</span></h1>
-        <p id="sede-label" class="text-center font-bold uppercase text-indigo-500 mb-10"></p>
+<body style="background:#f4faf7;">
 
-        <div class="md:flex gap-10">
-            <div class="md:w-1/2 bg-white shadow-lg rounded-lg p-8">
-                <form id="formulario-cita">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block font-bold uppercase text-xs">DPI</label>
-                            <input id="dpi" type="text" class="border w-full p-2 rounded">
-                        </div>
-                        <div>
-                            <label class="block font-bold uppercase text-xs">Sexo</label>
-                            <select id="sexo" class="border w-full p-2 rounded">
-                                <option value="">-- Seleccione --</option>
-                                <option value="MASCULINO">Masculino</option>
-                                <option value="FEMENINO">Femenino</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block font-bold uppercase text-xs">Nombres</label>
-                            <input id="nombres" type="text" class="border w-full p-2 rounded">
-                        </div>
-                        <div>
-                            <label class="block font-bold uppercase text-xs">Apellidos</label>
-                            <input id="apellidos" type="text" class="border w-full p-2 rounded">
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Fecha Nacimiento</label>
-                        <input id="fecha_nacimiento" type="date" class="border w-full p-2 rounded">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block font-bold uppercase text-xs">Teléfono</label>
-                            <input id="telefono" type="tel" class="border w-full p-2 rounded">
-                        </div>
-                        <div>
-                            <label class="block font-bold uppercase text-xs">Email</label>
-                            <input id="email" type="email" class="border w-full p-2 rounded">
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Dirección</label>
-                        <input id="direccion" type="text" class="border w-full p-2 rounded">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Contacto Emergencia (Opcional)</label>
-                        <input id="contacto_emergencia" type="text" class="border w-full p-2 rounded">
-                    </div>
-
-                    <hr class="my-6">
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Especialidad</label>
-                        <select id="especialidad" class="border w-full p-2 rounded"></select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Doctor</label>
-                        <select id="doctor" class="border w-full p-2 rounded" disabled>
-                            <option value="">-- Seleccione Doctor --</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Fecha Cita</label>
-                        <input id="fecha" type="datetime-local" class="border w-full p-2 rounded">
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block font-bold uppercase text-xs">Motivo</label>
-                        <textarea id="motivo" class="border w-full p-2 rounded"></textarea>
-                    </div>
-
-                    <input type="submit" value="Registrar Cita" class="bg-indigo-600 hover:bg-indigo-700 w-full p-3 text-white uppercase font-bold cursor-pointer rounded">
-                </form>
-            </div>
-
-            <div class="md:w-1/2">
-                <h2 class="text-2xl font-black text-center mb-5">Citas Agendadas</h2>
-                <div id="contenedor-citas"></div>
-            </div>
+    <!-- ── Encabezado ── -->
+    <div class="header-bar">
+        <a href="index.html" class="header-brand">
+            <div class="header-cruz">+</div>
+            <span>Clínica Médica Integral</span>
+        </a>
+        <div class="header-sede">
+            <div class="dot"></div>
+            <span id="sede-label">Cargando sede...</span>
         </div>
     </div>
+
+    <!-- ── Hero strip ── -->
+    <div class="hero-strip">
+        <div class="icon-wrap">📋</div>
+        <div>
+            <h1>Agendar Cita Médica</h1>
+            <p>Complete el formulario para reservar su consulta. Le enviaremos confirmación a su correo.</p>
+        </div>
+    </div>
+
+    <!-- ── Layout principal ── -->
+    <div class="main-layout">
+
+        <!-- Formulario -->
+        <div class="form-panel">
+
+            <div id="alerta-container"></div>
+
+            <form id="formulario-cita">
+
+                <p class="section-title">Datos Personales</p>
+
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label" for="dpi">DPI <span style="color:#e53e3e;">*</span></label>
+                        <input id="dpi" type="text" placeholder="13 dígitos" maxlength="13">
+                        <p class="error-msg" id="error-dpi"></p>
+                    </div>
+                    <div>
+                        <label class="field-label" for="sexo">Sexo <span style="color:#e53e3e;">*</span></label>
+                        <select id="sexo">
+                            <option value="">-- Seleccione --</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="FEMENINO">Femenino</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label" for="nombres">Nombres <span style="color:#e53e3e;">*</span></label>
+                        <input id="nombres" type="text" placeholder="Ej. María Lucía">
+                        <p class="error-msg" id="error-nombres"></p>
+                    </div>
+                    <div>
+                        <label class="field-label" for="apellidos">Apellidos <span style="color:#e53e3e;">*</span></label>
+                        <input id="apellidos" type="text" placeholder="Ej. García López">
+                        <p class="error-msg" id="error-apellidos"></p>
+                    </div>
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="fecha_nacimiento">Fecha de Nacimiento <span style="color:#e53e3e;">*</span></label>
+                    <input id="fecha_nacimiento" type="date">
+                </div>
+
+                <div class="field-grid">
+                    <div>
+                        <label class="field-label" for="telefono">Teléfono <span style="color:#e53e3e;">*</span></label>
+                        <input id="telefono" type="tel" placeholder="8 dígitos" maxlength="8">
+                        <p class="error-msg" id="error-telefono"></p>
+                    </div>
+                    <div>
+                        <label class="field-label" for="email">Correo Electrónico <span style="color:#e53e3e;">*</span></label>
+                        <input id="email" type="email" placeholder="Ej. correo@gmail.com">
+                        <p class="error-msg" id="error-email"></p>
+                    </div>
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="direccion">Dirección <span style="color:#e53e3e;">*</span></label>
+                    <input id="direccion" type="text" placeholder="Ej. Zona 1, Ciudad de Guatemala">
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="contacto_emergencia">Contacto de Emergencia <span style="color:#999; font-weight:400;">(Opcional)</span></label>
+                    <input id="contacto_emergencia" type="text" placeholder="Nombre y teléfono">
+                </div>
+
+                <hr class="divider">
+                <p class="section-title">Datos de la Cita</p>
+
+                <div class="field-full">
+                    <label class="field-label" for="especialidad">Especialidad <span style="color:#e53e3e;">*</span></label>
+                    <select id="especialidad">
+                        <option value="">-- Seleccione Especialidad --</option>
+                    </select>
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="doctor">Médico Asignado <span style="color:#e53e3e;">*</span></label>
+                    <select id="doctor" disabled>
+                        <option value="">-- Seleccione Doctor --</option>
+                    </select>
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="fecha">Fecha y Hora de la Cita <span style="color:#e53e3e;">*</span></label>
+                    <input id="fecha" type="datetime-local">
+                </div>
+
+                <div class="field-full">
+                    <label class="field-label" for="motivo">Motivo de Consulta <span style="color:#e53e3e;">*</span></label>
+                    <textarea id="motivo" placeholder="Describa brevemente el motivo de su visita..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Confirmar y Registrar Cita</button>
+
+            </form>
+        </div>
+
+        <!-- Panel citas agendadas -->
+        <div class="citas-panel">
+            <div class="citas-header">
+                <h2>Citas Agendadas</h2>
+                <span class="citas-count" id="citas-count">0 citas</span>
+            </div>
+
+            <div id="contenedor-citas">
+                <div class="empty-state">
+                    <div class="icon">📅</div>
+                    <p>Sus citas aparecerán aquí<br>una vez registradas.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <script src="js/agendar.js"></script>
+    <script>
+        // Actualizar contador de citas
+        const observer = new MutationObserver(() => {
+            const count = document.querySelectorAll('.cita-card').length;
+            document.getElementById('citas-count').textContent = `${count} cita${count !== 1 ? 's' : ''}`;
+        });
+        observer.observe(document.getElementById('contenedor-citas'), { childList: true });
+    </script>
 </body>
 </html>

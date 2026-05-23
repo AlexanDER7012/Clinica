@@ -12,6 +12,7 @@ import auth from "./routes/auth.routes.js";
 import facturas from "./routes/factura.routes.js"; 
 import reportes from "./routes/reporte.routes.js";
 import auditoria from "./routes/auditoria.routes.js";
+import correo from "./routes/correo.routes.js";
 const configCors = {
     origin:"http://127.0.0.1:5500"
 };
@@ -34,5 +35,6 @@ app.use("/auth", auth);
 app.use("/facturas", facturas);
 app.use("/reportes", reportes);
 app.use("/auditoria", auditoria);
+app.use("/correo", correo);
 
 export default app;
