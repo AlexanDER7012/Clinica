@@ -115,15 +115,9 @@ const buscarPaciente = async (req, res) => {
 
 const createPaciente = async (req, res) => {
     const { 
-        nombres, 
-        apellidos, 
-        dpi, 
-        sexo, 
-        telefono, 
-        email, 
-        fecha_nacimiento, 
-        direccion, 
-        contacto_emergencia 
+        nombres, apellidos, dpi, sexo, telefono, 
+        email, fecha_nacimiento, direccion, 
+        contacto_emergencia, alergias  // ← nuevo
     } = req.body;
     try{
         const pacienteNuevo = await prisma.paciente.create({
@@ -136,16 +130,17 @@ const createPaciente = async (req, res) => {
                 email,
                 direccion,
                 contacto_emergencia,
+                alergias: alergias || null,  // ← nuevo
                 fecha_nacimiento: new Date(fecha_nacimiento) 
             },
         });
 
         await registrarLog({
-            accion: 'CREAR_PACIENTE',
+            accion:         'CREAR_PACIENTE',
             tabla_afectada: 'Paciente',
-            ip_origen:getIp(req),
-            detalle: `Paciente ${nombres} ${apellidos} (DPI: ${dpi}) registrado`,
-            usuarioId: req.usuario?.id || null
+            ip_origen:      getIp(req),
+            detalle:        `Paciente ${nombres} ${apellidos} (DPI: ${dpi}) registrado`,
+            usuarioId:      req.usuario?.id || null
         });
 
         res.status(201).json(pacienteNuevo);
@@ -160,7 +155,8 @@ const updatePaciente = async (req, res) => {
         const {id} = req.params;
         const { 
             nombres, apellidos, dpi, sexo, telefono, 
-            email, direccion, contacto_emergencia, fecha_nacimiento 
+            email, direccion, contacto_emergencia, 
+            fecha_nacimiento, alergias  // ← nuevo
         } = req.body;
 
         const pacienteActualizado = await prisma.paciente.update({
@@ -174,11 +170,11 @@ const updatePaciente = async (req, res) => {
                 email,
                 direccion,
                 contacto_emergencia,
+                alergias: alergias !== undefined ? alergias : undefined,  // ← nuevo
                 fecha_nacimiento: fecha_nacimiento ? new Date(fecha_nacimiento) : undefined
             },
         });
 
-        // ── Log ──────────────────────────────────────────────
         await registrarLog({
             accion:         'MODIFICAR_PACIENTE',
             tabla_afectada: 'Paciente',
@@ -193,6 +189,30 @@ const updatePaciente = async (req, res) => {
     }
 };
 
+const updateAlergias = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { alergias } = req.body;
+
+        const paciente = await prisma.paciente.update({
+            where: { id_paciente: parseInt(id) },
+            data:  { alergias: alergias || null }
+        });
+
+        await registrarLog({
+            accion:         'ACTUALIZAR_ALERGIAS',
+            tabla_afectada: 'Paciente',
+            ip_origen:      getIp(req),
+            detalle:        `Alergias del paciente #${id} actualizadas`,
+            usuarioId:      req.usuario?.id || null
+        });
+
+        res.json({ message: 'Alergias actualizadas correctamente.', paciente });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const deletePaciente = async (req, res) =>{
     try{
         const {id} = req.params;
@@ -202,11 +222,11 @@ const deletePaciente = async (req, res) =>{
         });
 
         await registrarLog({
-            accion: 'ELIMINAR_PACIENTE',
-            tabla_afectada:'Paciente',
-            ip_origen: getIp(req),
-            detalle: `Paciente #${id} eliminado del sistema`,
-            usuarioId: req.usuario?.id || null
+            accion:         'ELIMINAR_PACIENTE',
+            tabla_afectada: 'Paciente',
+            ip_origen:      getIp(req),
+            detalle:        `Paciente #${id} eliminado del sistema`,
+            usuarioId:      req.usuario?.id || null
         });
 
         res.json({ message: "Paciente eliminado correctamente"});
@@ -223,5 +243,6 @@ export{
     updatePaciente,
     deletePaciente,
     getPacienteByDpi,
-    buscarPaciente
+    buscarPaciente,
+    updateAlergias
 };

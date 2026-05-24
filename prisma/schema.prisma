@@ -80,6 +80,7 @@ model Paciente {
   email               String
   direccion           String
   contacto_emergencia String?
+  alergias            String?
   fecha_nacimiento    DateTime
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

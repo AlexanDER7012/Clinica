@@ -48,7 +48,15 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-10h-4v10zm6 0h4v-11h-4v11zm6 0h4v-7h-4v7zm-12 4h16v-2h-16v2z"/></svg>
       Control General
     </a>
-    <a id="btn-nav-auditoria" class="nav-item" href="#">
+    <a id="btn-nav-historial" class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zm-2 8H7v-2h4v2zm4-4H7v-2h8v2z"/></svg>
+      Expedientes
+    </a>
+        <a id="btn-nav-reportes" class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+      Reportes
+    </a>
+        <a id="btn-nav-auditoria" class="nav-item" href="#">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
       Auditoría
     </a>
@@ -361,6 +369,152 @@
           </table>
         </div>
       </div>
+    </div>
+
+
+
+    <!-- ── HISTORIAL CLÍNICO ─────────────────────────────────── -->
+    <div id="sec-historial" class="view-section">
+      <div class="admin-card" style="padding:24px; margin-bottom:20px;">
+        <div class="admin-title" style="margin-bottom:6px;">Expediente Clínico del Paciente</div>
+        <p style="color:#718096; font-size:0.9rem; margin-bottom:20px;">
+          Busque al paciente por DPI para ver su historial completo de consultas y alergias registradas.
+        </p>
+        <div style="display:flex; gap:12px; align-items:flex-end;">
+          <div style="flex:1;">
+            <label style="font-size:0.75rem; font-weight:600; color:#4a5568; text-transform:uppercase; display:block; margin-bottom:6px;">DPI del Paciente</label>
+            <input type="text" id="hist-dpi" placeholder="Ej. 1234567891221" maxlength="13"
+              style="width:100%; border:1.5px solid #d4e8e0; border-radius:10px; padding:10px 14px;
+                     font-family:inherit; font-size:0.95rem; outline:none;">
+          </div>
+          <button id="hist-btn-buscar" class="btn-submit" style="padding:10px 28px; white-space:nowrap;">
+            Buscar Expediente
+          </button>
+        </div>
+      </div>
+      <div id="hist-panel-resultado"></div>
+    </div>
+
+    <!-- ── REPORTES ───────────────────────────────────────────── -->
+    <div id="sec-reportes" class="view-section">
+
+      <!-- Formulario generador -->
+      <div class="admin-card" style="padding:24px; margin-bottom:24px;">
+        <div class="admin-title" style="margin-bottom:6px;">Generar Reporte Estadístico</div>
+        <p style="color:#718096; font-size:0.9rem; margin-bottom:20px;">
+          Genera y guarda un reporte mensual con morbilidad y productividad médica. Los datos de pacientes son anonimizados.
+        </p>
+        <form id="form-generar-reporte">
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:14px; align-items:flex-end;">
+            <div class="form-group" style="margin:0;">
+              <label for="reporte-mes">Mes</label>
+              <select id="reporte-mes" class="form-control">
+                <option value="">-- Mes --</option>
+                <option value="1">Enero</option><option value="2">Febrero</option>
+                <option value="3">Marzo</option><option value="4">Abril</option>
+                <option value="5">Mayo</option><option value="6">Junio</option>
+                <option value="7">Julio</option><option value="8">Agosto</option>
+                <option value="9">Septiembre</option><option value="10">Octubre</option>
+                <option value="11">Noviembre</option><option value="12">Diciembre</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="reporte-anio">Año</label>
+              <input type="number" id="reporte-anio" class="form-control" value="2026" min="2020" max="2030">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label for="reporte-sedeId">Sede</label>
+              <select id="reporte-sedeId" class="form-control">
+                <option value="">-- Sede --</option>
+              </select>
+            </div>
+            <button type="submit" id="btn-generar-reporte" class="btn-submit" style="padding:10px 20px; white-space:nowrap;">
+              Generar y Guardar Reporte
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Resultados del reporte -->
+      <div id="reportes-resultados" style="display:none;">
+
+        <div class="admin-card" style="padding:24px; margin-bottom:24px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div>
+              <div class="admin-title" style="margin-bottom:4px;" id="reporte-titulo">Reporte</div>
+              <span style="background:#e9d8fd; color:#553c9a; font-size:0.75rem; padding:3px 10px; border-radius:20px; font-weight:600;">
+                ✓ Datos anonimizados — Privacidad médica protegida
+              </span>
+            </div>
+          </div>
+
+          <!-- Tarjetas resumen -->
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:28px;">
+            <div style="background:#f0fff4; border:1px solid #9ae6b4; border-radius:10px; padding:16px; text-align:center;">
+              <p style="font-size:0.75rem; color:#22543d; font-weight:600; text-transform:uppercase; margin:0 0 6px;">Total Atenciones</p>
+              <p id="rep-total-citas" style="font-size:1.8rem; font-weight:700; color:#22543d; margin:0;">—</p>
+            </div>
+            <div style="background:#ebf8ff; border:1px solid #90cdf4; border-radius:10px; padding:16px; text-align:center;">
+              <p style="font-size:0.75rem; color:#2b6cb0; font-weight:600; text-transform:uppercase; margin:0 0 6px;">Ingresos del Mes</p>
+              <p id="rep-ingresos" style="font-size:1.8rem; font-weight:700; color:#2b6cb0; margin:0;">—</p>
+            </div>
+            <div style="background:#fefcbf; border:1px solid #f6e05e; border-radius:10px; padding:16px; text-align:center;">
+              <p style="font-size:0.75rem; color:#744210; font-weight:600; text-transform:uppercase; margin:0 0 6px;">Tasa Finalización</p>
+              <p id="rep-finalizacion" style="font-size:1.8rem; font-weight:700; color:#744210; margin:0;">—</p>
+            </div>
+          </div>
+
+          <!-- 5.1 Morbilidad -->
+          <p style="font-weight:700; color:#2d3748; font-size:0.95rem; margin:0 0 6px;">Morbilidad: Motivos de Consulta más Frecuentes</p>
+          <p style="color:#718096; font-size:0.82rem; margin:0 0 16px;">Datos anonimizados — no incluye información de pacientes.</p>
+          <div style="height:320px; margin-bottom:28px;">
+            <canvas id="chart-morbilidad"></canvas>
+          </div>
+
+          <!-- 5.2 Productividad -->
+          <p style="font-weight:700; color:#2d3748; font-size:0.95rem; margin:0 0 6px;">Productividad Médica</p>
+          <p style="color:#718096; font-size:0.82rem; margin:0 0 16px;">Comparativa de atención entre médicos del período seleccionado.</p>
+          <div style="overflow-x:auto; border-radius:8px; border:1px solid #eef2f8;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+              <thead style="background:#f8fafc; border-bottom:2px solid #eef2f8;">
+                <tr>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:left;">Médico</th>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Total</th>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Finalizadas</th>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Canceladas</th>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Pendientes</th>
+                  <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Efectividad</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-productividad"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de reportes -->
+      <div class="admin-card" style="padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="admin-title" style="margin:0;">Historial de Reportes Guardados</div>
+          <span id="historial-conteo" style="background:#e2e8f0; color:#4a5568; font-size:0.78rem; padding:3px 10px; border-radius:20px; font-weight:600;">0 reportes</span>
+        </div>
+        <div style="overflow-x:auto; border-radius:8px; border:1px solid #eef2f8;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead style="background:#f8fafc; border-bottom:2px solid #eef2f8;">
+              <tr>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600;">ID</th>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600;">Período</th>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600;">Sede</th>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600;">Tipo</th>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600;">Generado</th>
+                <th style="padding:12px 16px; color:#4a5568; font-weight:600; text-align:center;">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-historial"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </main>
