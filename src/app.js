@@ -3,52 +3,60 @@ import cors from "cors";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import pacientes from "./routes/paciente.routes.js";
-import doctores from "./routes/doctor.routes.js";
-import sedes from "./routes/sede.routes.js";
+import pacientes    from "./routes/paciente.routes.js";
+import doctores     from "./routes/doctor.routes.js";
+import sedes        from "./routes/sede.routes.js";
 import especialidades from "./routes/especialidad.routes.js";
-import usuarios from "./routes/usuario.routes.js";
-import citas from "./routes/cita.routes.js";
-import auth from "./routes/auth.routes.js";
-import facturas from "./routes/factura.routes.js";
-import reportes from "./routes/reporte.routes.js";
-import auditoria from "./routes/auditoria.routes.js";
-import correo from "./routes/correo.routes.js";
-import historial from "./routes/historial.routes.js";
-import documentos from "./routes/documento.routes.js";
+import usuarios     from "./routes/usuario.routes.js";
+import citas        from "./routes/cita.routes.js";
+import auth         from "./routes/auth.routes.js";
+import facturas     from "./routes/factura.routes.js";
+import reportes     from "./routes/reporte.routes.js";
+import auditoria    from "./routes/auditoria.routes.js";
+import correo       from "./routes/correo.routes.js";
+import historial    from "./routes/historial.routes.js";
+import documentos   from "./routes/documento.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
 
 const app = express();
 
-const configCors = {
-    origin: '*' 
-};
-app.use(cors(configCors));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, '../public')));
+
+app.use(express.static(path.join(__dirname, '../public'), {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (filePath.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        }
+    }
+}));
 
 app.get("/api", (req, res) => {
     res.json({ message: "Api is working" });
 });
 
-app.use("/pacientes", pacientes);
-app.use("/doctores", doctores);
-app.use("/sedes", sedes);
+app.use("/pacientes",      pacientes);
+app.use("/doctores",       doctores);
+app.use("/sedes",          sedes);
 app.use("/especialidades", especialidades);
-app.use("/usuarios", usuarios);
-app.use("/citas", citas);
-app.use("/auth", auth);
-app.use("/facturas", facturas);
-app.use("/reportes", reportes);
-app.use("/auditoria", auditoria);
-app.use("/correo", correo);
-app.use("/historial", historial);
-app.use("/documentos", documentos);
+app.use("/usuarios",       usuarios);
+app.use("/citas",          citas);
+app.use("/auth",           auth);
+app.use("/facturas",       facturas);
+app.use("/reportes",       reportes);
+app.use("/auditoria",      auditoria);
+app.use("/correo",         correo);
+app.use("/historial",      historial);
+app.use("/documentos",     documentos);
 
-app.get('/{*path}', (req, res) => {
+// Fallback — solo para rutas HTML, no archivos estáticos
+app.use((req, res, next) => {
+    if (req.path.includes('.')) return next();
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
