@@ -85,6 +85,7 @@ model Paciente {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   citas               Cita[]
+  documentos          Documento[]
 }
 
 model Cita {
@@ -129,7 +130,16 @@ model ReporteEstadistico {
   sede           Sede     @relation(fields: [sedeId], references: [id_sede])
   createdAt      DateTime @default(now())
 }
-
+model Documento {
+  id_documento  Int      @id @default(autoincrement())
+  nombre        String
+  tipo          String   
+  url           String   
+  public_id     String   
+  pacienteId    Int
+  paciente      Paciente @relation(fields: [pacienteId], references: [id_paciente])
+  createdAt     DateTime @default(now())
+}
 
 
 enum Rol {

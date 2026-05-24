@@ -1,3 +1,4 @@
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 import { API_URL } from './menuConfig.js';
 import { estado }  from './menuConfig.js';
 
@@ -33,6 +34,7 @@ export async function cargarSelectsFormulario() {
   }
 }
 
+// ── Restablecedores ───────────────────────────────────────────
 export function restablecerFormularioDoctor() {
   const form = document.getElementById('formulario-doctor');
   if (form) {
@@ -114,6 +116,7 @@ export function initDoctorForm() {
     }
   }
 }
+
 export function initSedeForm() {
   const formSede = document.getElementById('formulario-sede');
   if (formSede) {

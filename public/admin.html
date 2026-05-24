@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Clínica Admin — Panel Administrador</title>
+  <title>Clínica Privada — Panel Administrador</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/dashboard.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -15,7 +16,7 @@
     <div class="logo-icon">
       <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
     </div>
-    <div class="logo-text">Clínica<span>Admin</span></div>
+    <div class="logo-text">Clínica<span>Privada</span></div>
   </div>
   <nav class="nav">
     <div class="nav-label">Principal</div>
@@ -74,12 +75,21 @@
       <span class="page-title" id="dinamic-title">Dashboard Analítico</span>
     </div>
     <div class="topbar-right">
-      <div class="top-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </div>
-      <div class="top-icon">
+      <div class="top-icon" id="btn-notificaciones" style="position:relative; cursor:pointer;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="badge">8</span>
+        <span class="badge" id="badge-notif" style="display:none;">0</span>
+        <!-- Dropdown notificaciones -->
+        <div id="dropdown-notif" style="display:none; position:absolute; top:44px; right:0; width:340px;
+             background:white; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+             border:1px solid #eef2f8; z-index:999; overflow:hidden;">
+          <div style="padding:14px 16px; border-bottom:1px solid #eef2f8; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:700; color:#1a365d; font-size:0.9rem;">Citas Canceladas</span>
+            <span id="notif-subtitulo" style="font-size:0.75rem; color:#718096;">Sin confirmar</span>
+          </div>
+          <div id="notif-lista" style="max-height:320px; overflow-y:auto;">
+            <p style="text-align:center; color:#a0aec0; font-size:0.85rem; padding:20px;">Cargando...</p>
+          </div>
+        </div>
       </div>
       <div class="user-info">
         <div class="avatar" id="adminAvatar">AD</div>

@@ -1,9 +1,10 @@
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 import { API_URL } from './menuConfig.js';
 
 const estadoFac = {
   citaSeleccionada: null,
   pacienteSeleccionado: null,
-  ultimaFactura: null,
+  ultimaFactura: null, // ← guardamos la última para poder descargarla
 };
 
 export function initFacturacionModule() {
@@ -50,7 +51,7 @@ async function buscarPaciente() {
   const q     = document.getElementById('fac-buscar-input')?.value.trim();
   const token = localStorage.getItem('token');
 
-  if (!q) { alert('Ingrese un DPI o nombre para buscar.'); return; }
+  if (!q) { toastInfo('Ingrese un DPI o nombre para buscar.'); return; }
 
   const contenedor = document.getElementById('fac-resultados-lista');
   const sec        = document.getElementById('fac-sec-resultados');
@@ -172,7 +173,7 @@ function initFormularioFactura() {
     const token = localStorage.getItem('token');
 
     if (!estadoFac.citaSeleccionada) {
-      alert('Debe seleccionar una cita primero.');
+      toastInfo('Debe seleccionar una cita primero.');
       return;
     }
 
@@ -181,7 +182,7 @@ function initFormularioFactura() {
     const nit_receptor  = document.getElementById('fac-nit')?.value.trim() || 'CF';
 
     if (!precio || parseFloat(precio) <= 0) {
-      alert('Ingrese un precio de consulta válido.');
+      toastInfo('Ingrese un precio de consulta válido.');
       return;
     }
 

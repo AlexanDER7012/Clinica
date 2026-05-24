@@ -1,3 +1,4 @@
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 /* ══════════════════════════════════════
    js/menuCitas.js
    Módulo de Gestión de Citas — Panel Secretaria
@@ -8,6 +9,8 @@ import { API_URL } from './menuConfig.js';
 const estadoCitas = {
   listaCitas:  [],
   vistaActual: 'lista',
+  paginaActual: 1,
+  porPagina:    10,
 };
 
 export function initCitasModule() {
@@ -43,7 +46,17 @@ export async function cargarListaCitas(filtros = {}) {
   const tbody = document.getElementById('citas-tbody');
   if (!tbody) return;
 
-  tbody.innerHTML = `<tr><td colspan="7" style="padding:20px; text-align:center; color:#888;">Cargando citas...</td></tr>`;
+  // Skeleton loader
+  tbody.innerHTML = [1,2,3,4,5].map(() => `
+    <tr class="skeleton-row" style="border-bottom:1px solid #eef2f8;">
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:30px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:120px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:100px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:80px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:110px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:70px; border-radius:20px;"></div></td>
+      <td style="padding:12px 16px;"><div class="skeleton skeleton-cell" style="width:60px; margin:auto;"></div></td>
+    </tr>`).join('');
 
   try {
     const params = new URLSearchParams(filtros).toString();
@@ -64,18 +77,27 @@ export async function cargarListaCitas(filtros = {}) {
   }
 }
 
-// ── Render tabla ──────────────────────────────────────────────
+// ── Render tabla con paginación ───────────────────────────────
 function renderizarTablaCitas(lista) {
   const tbody = document.getElementById('citas-tbody');
   if (!tbody) return;
 
   if (lista.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="padding:20px; text-align:center; color:#888;">No hay citas registradas.</td></tr>`;
+    renderPaginacion(0);
     return;
   }
 
+  // Calcular página
+  const total   = lista.length;
+  const paginas = Math.ceil(total / estadoCitas.porPagina);
+  if (estadoCitas.paginaActual > paginas) estadoCitas.paginaActual = 1;
+  const inicio  = (estadoCitas.paginaActual - 1) * estadoCitas.porPagina;
+  const fin     = inicio + estadoCitas.porPagina;
+  const paginada = lista.slice(inicio, fin);
+
   tbody.innerHTML = '';
-  lista.forEach(cita => {
+  paginada.forEach(cita => {
     const badge = getBadgeEstado(cita.estado);
     const tr    = document.createElement('tr');
     tr.style.borderBottom = '1px solid #eef2f8';
@@ -124,6 +146,64 @@ function renderizarTablaCitas(lista) {
     tr.querySelector('.btn-correo')?.addEventListener('click',        () => enviarCorreoCita(cita.id, cita.paciente));
 
     tbody.appendChild(tr);
+  });
+
+  renderPaginacion(lista.length);
+}
+
+function renderPaginacion(total) {
+  // Eliminar paginación anterior
+  document.getElementById('citas-paginacion')?.remove();
+
+  if (total <= estadoCitas.porPagina) return;
+
+  const paginas = Math.ceil(total / estadoCitas.porPagina);
+  const actual  = estadoCitas.paginaActual;
+  const inicio  = (actual - 1) * estadoCitas.porPagina + 1;
+  const fin     = Math.min(actual * estadoCitas.porPagina, total);
+
+  const div = document.createElement('div');
+  div.id    = 'citas-paginacion';
+  div.className = 'paginacion';
+
+  // Generar botones de página
+  let btns = '';
+  const rango = 2;
+  for (let i = 1; i <= paginas; i++) {
+    if (i === 1 || i === paginas || (i >= actual - rango && i <= actual + rango)) {
+      btns += `<button class="pag-btn ${i === actual ? 'active' : ''}" data-pag="${i}">${i}</button>`;
+    } else if (i === actual - rango - 1 || i === actual + rango + 1) {
+      btns += `<span style="color:#a0aec0;padding:0 4px;">…</span>`;
+    }
+  }
+
+  div.innerHTML = `
+    <div class="paginacion-info">
+      Mostrando <strong>${inicio}–${fin}</strong> de <strong>${total}</strong> citas
+    </div>
+    <div class="paginacion-btns">
+      <button class="pag-btn" id="pag-prev" ${actual === 1 ? 'disabled' : ''}>‹</button>
+      ${btns}
+      <button class="pag-btn" id="pag-next" ${actual === paginas ? 'disabled' : ''}>›</button>
+    </div>
+  `;
+
+  // Insertar después del tbody
+  const tabla = document.getElementById('citas-tbody')?.closest('table');
+  tabla?.parentElement?.appendChild(div);
+
+  // Eventos
+  div.querySelector('#pag-prev')?.addEventListener('click', () => {
+    if (estadoCitas.paginaActual > 1) { estadoCitas.paginaActual--; renderizarTablaCitas(estadoCitas.listaCitas); }
+  });
+  div.querySelector('#pag-next')?.addEventListener('click', () => {
+    if (estadoCitas.paginaActual < paginas) { estadoCitas.paginaActual++; renderizarTablaCitas(estadoCitas.listaCitas); }
+  });
+  div.querySelectorAll('.pag-btn[data-pag]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      estadoCitas.paginaActual = parseInt(btn.dataset.pag);
+      renderizarTablaCitas(estadoCitas.listaCitas);
+    });
   });
 }
 
@@ -250,7 +330,7 @@ function initModalReprogramar() {
 
         cerrarModalReprogramar();
         await cargarListaCitas();
-        alert('¡Cita reprogramada exitosamente!');
+        toastInfo('¡Cita reprogramada exitosamente!');
       } catch (err) {
         if (errorEl) errorEl.textContent = `Error: ${err.message}`;
       }
@@ -381,7 +461,7 @@ function initBuscadorDpi() {
     const dpi   = document.getElementById('cita-dpi')?.value.trim();
     const panel = document.getElementById('panel-datos-paciente');
     const info  = document.getElementById('info-paciente-encontrado');
-    if (!dpi) { alert('Ingrese un DPI para buscar.'); return; }
+    if (!dpi) { toastInfo('Ingrese un DPI para buscar.'); return; }
 
     const token = localStorage.getItem('token');
     try {
@@ -414,7 +494,7 @@ function initBuscadorDpi() {
         toggleFormularioPaciente(true);
       }
     } catch (err) {
-      alert('Error al buscar paciente: ' + err.message);
+      toastError('Error al buscar paciente: ');
     }
   });
 }
@@ -444,13 +524,13 @@ function initFormularioCita() {
 
     // ── Validar que se haya buscado el DPI primero ────────────
     if (!pacienteBuscado) {
-      alert('Debe buscar el DPI del paciente antes de registrar la cita.');
+      toastInfo('Debe buscar el DPI del paciente antes de registrar la cita.');
       document.getElementById('cita-dpi')?.focus();
       return;
     }
 
     if (!dpi || !doctorId || !sedeId || !fecha) {
-      alert('Complete todos los campos obligatorios.');
+      toastInfo('Complete todos los campos obligatorios.');
       return;
     }
 
@@ -467,7 +547,7 @@ function initFormularioCita() {
       const nacimiento = document.getElementById('pac-nacimiento')?.value;
 
       if (!nombres || !apellidos || !telefono || !email || !direccion || !nacimiento) {
-        alert('Complete todos los datos del nuevo paciente.');
+        toastInfo('Complete todos los datos del nuevo paciente.');
         return;
       }
     }
@@ -515,7 +595,7 @@ function initFormularioCita() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al registrar la cita');
 
-      alert('¡Cita registrada exitosamente!');
+      toastInfo('¡Cita registrada exitosamente!');
 
       // ── Enviar correo si el email es Gmail ────────────────
       const emailPaciente = data.paciente?.email || '';

@@ -1,3 +1,4 @@
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 /* ══════════════════════════════════════
    js/admin.js — Punto de entrada ADMIN
 ══════════════════════════════════════ */
@@ -9,6 +10,7 @@ import { initDashboard, initAreaChart, initBarMiniChart } from './menuCharts.js'
 import { initUsuariosModule, cargarModuloUsuarios } from './menuUsuarios.js';
 import { initAuditoriaModule, cargarModuloAuditoria } from './menuAuditoria.js';
 import { initReportesModule, cargarModuloReportes } from './menuReportes.js';
+import { initNotificaciones } from './menuNotificaciones.js';
 import { initHistorialModule } from './menuHistorial.js';
 import { API_URL }from './menuConfig.js';
 
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'index.html';
     return;
   }
- 
+
   initRouter();
   initDoctorForm();
   initSedeForm();
@@ -28,13 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuditoriaModule();
   initReportesModule();
   initHistorialModule();
+  initNotificaciones();
   initLogout();
   initAreaChart();
   initBarMiniChart();
   initDashboard();
   cargarPacientes();
 });
- 
+
 function initRouter() {
   const vistas = {
     'btn-nav-dashboard':   { sec: 'sec-dashboard',   titulo: 'Dashboard Analítico' },
@@ -48,14 +51,14 @@ function initRouter() {
     'btn-nav-reportes':    { sec: 'sec-reportes',    titulo: 'Reportes Estadísticos' },
     'btn-nav-auditoria':   { sec: 'sec-auditoria',    titulo: 'Log de Auditoría del Sistema' },
   };
- 
+
   const pageTitle = document.getElementById('dinamic-title');
- 
+
   function ocultarTodo() {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active-view'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   }
- 
+
   Object.entries(vistas).forEach(([btnId, { sec, titulo }]) => {
     const btn = document.getElementById(btnId);
     if (!btn) return;
@@ -65,7 +68,7 @@ function initRouter() {
       btn.classList.add('active');
       document.getElementById(sec)?.classList.add('active-view');
       if (pageTitle) pageTitle.textContent = titulo;
- 
+
       if (btnId === 'btn-nav-doctores')  cargarSelectsFormulario();
       if (btnId === 'btn-nav-control')   cambiarContextoControl('doctores');
       if (btnId === 'btn-nav-usuarios')  cargarModuloUsuarios();
@@ -76,23 +79,23 @@ function initRouter() {
     });
   });
 }
- 
+
 async function cargarPacientes() {
   const token = localStorage.getItem('token');
   const tbody = document.getElementById('pacientes-tbody');
   if (!tbody) return;
- 
+
   tbody.innerHTML = `<tr><td colspan="6" style="padding:20px; text-align:center; color:#888;">Cargando...</td></tr>`;
- 
+
   try {
     const res       = await fetch(`${API_URL}/pacientes`, { headers: { 'Authorization': `Bearer ${token}` } });
     const pacientes = await res.json();
- 
+
     if (!pacientes.length) {
       tbody.innerHTML = `<tr><td colspan="6" style="padding:20px; text-align:center; color:#888;">No hay pacientes.</td></tr>`;
       return;
     }
- 
+
     tbody.innerHTML = '';
     pacientes.forEach(p => {
       const tr = document.createElement('tr');

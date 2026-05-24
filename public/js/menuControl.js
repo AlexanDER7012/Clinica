@@ -1,13 +1,6 @@
-/* ══════════════════════════════════════
-   js/menuControl.js
-   Tabla Dinámica de Control: Render, Filtros, Editar, Eliminar
-══════════════════════════════════════ */
-
-import { API_URL, estado }                                              from './menuConfig.js';
-import { cargarSelectsFormulario,
-         restablecerFormularioDoctor,
-         restablecerFormularioSede,
-         restablecerFormularioEspecialidad }                            from './menuForms.js';
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
+import { API_URL, estado }from './menuConfig.js';
+import { cargarSelectsFormulario,restablecerFormularioDoctor,restablecerFormularioSede,restablecerFormularioEspecialidad } from './menuForms.js';
 
 // ── Inicialización del módulo ─────────────────────────────────
 export function initControlModule() {
@@ -52,6 +45,7 @@ export async function cambiarContextoControl(contexto) {
   }
 }
 
+// ── Render de cabeceras y cuerpo ──────────────────────────────
 export function procesarYRenderizarTabla(datos) {
   const trHeaders = document.getElementById('tabla-headers');
   const tbody     = document.getElementById('tabla-body-rows');
@@ -96,6 +90,7 @@ export function procesarYRenderizarTabla(datos) {
   inyectarFilasEnTabla(datos);
 }
 
+// ── Inyección de filas ────────────────────────────────────────
 export function inyectarFilasEnTabla(listaFiltro) {
   const tbody = document.getElementById('tabla-body-rows');
   tbody.innerHTML = "";
@@ -154,6 +149,7 @@ export function inyectarFilasEnTabla(listaFiltro) {
   });
 }
 
+// ── Filtro de búsqueda ────────────────────────────────────────
 export function filtrarYMostrarTabla(termino) {
   if (!termino) { inyectarFilasEnTabla(estado.coleccionDatosControl); return; }
 
@@ -176,6 +172,7 @@ export function filtrarYMostrarTabla(termino) {
   inyectarFilasEnTabla(filtrados);
 }
 
+// ── Acción: Modificar registro ────────────────────────────────
 export async function ejecutarModificacionRegistro(id, objetoOriginal) {
   if (estado.contextoControlActual === 'doctores') {
     estado.idDoctorEditando = id;
@@ -227,6 +224,7 @@ export async function ejecutarModificacionRegistro(id, objetoOriginal) {
   }
 }
 
+// ── Acción: Eliminar registro ─────────────────────────────────
 export async function ejecutarEliminacionRegistro(id) {
   const token = localStorage.getItem('token');
   if (confirm(`¿Estás completamente seguro de eliminar permanentemente el registro #${id}? Esta acción no se puede deshacer.`)) {
@@ -236,8 +234,8 @@ export async function ejecutarEliminacionRegistro(id) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!respuesta.ok) throw new Error('No se pudo procesar la eliminación en el servidor');
-      alert('¡Registro removido de la base de datos exitosamente!');
+      toastInfo('¡Registro removido de la base de datos exitosamente!');
       cambiarContextoControl(estado.contextoControlActual);
-    } catch (err) { alert(err.message); }
+    } catch (err) { toastError(err.message); }
   }
 }

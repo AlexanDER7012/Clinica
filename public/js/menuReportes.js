@@ -1,9 +1,4 @@
-/* ══════════════════════════════════════
-   js/menuReportes.js
-   Módulo de Reportes Estadísticos — Panel Admin
-   REQ 5.1 Morbilidad + 5.2 Productividad
-══════════════════════════════════════ */
-
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 import { API_URL } from './menuConfig.js';
 
 let chartMorbilidad   = null;
@@ -57,7 +52,7 @@ function initFormularioReporte() {
     const btnGen = document.getElementById('btn-generar-reporte');
 
     if (!mes || !anio || !sedeId) {
-      alert('Complete todos los campos para generar el reporte.');
+      toastInfo('Complete todos los campos para generar el reporte.');
       return;
     }
 

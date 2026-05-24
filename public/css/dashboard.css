@@ -540,3 +540,74 @@ body {
 .btn-submit:hover {
   background: #1565c0;
 }
+
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f4f9 25%, #e3e9f2 50%, #f0f4f9 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 6px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef2f8;
+}
+
+.skeleton-cell {
+  height: 14px;
+  border-radius: 6px;
+}
+
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-top: 1px solid #eef2f8;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.paginacion-info {
+  font-size: 0.82rem;
+  color: #718096;
+}
+
+.paginacion-info strong { color: #2d3748; }
+
+.paginacion-btns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pag-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #4a5568;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pag-btn:hover:not(:disabled) { background: #eef2f8; border-color: #cbd5e0; }
+.pag-btn.active { background: #1976d2; color: white; border-color: #1976d2; font-weight: 700; }
+.pag-btn:disabled { opacity: 0.4; cursor: not-allowed; }

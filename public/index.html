@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica Médica Integral — Acceso</title>
+    <title>Clínica Privada — Acceso</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -417,6 +418,11 @@
         .form-wrap { animation: fadeUp 0.7s 0.2s ease both; }
 
         /* ── Responsive ── */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0);     }
+        }
+
         @media (max-width: 768px) {
             body { flex-direction: column; overflow: auto; }
             .panel-izq, .panel-der { width: 100%; padding: 40px 28px; }
@@ -432,12 +438,12 @@
     <div class="panel-izq">
         <div class="badge-clinica">
             <div class="cruz">+</div>
-            <span>Clínica Médica Integral</span>
+            <span>Clínica Privada</span>
         </div>
 
         <h1>Salud de <em>calidad</em><br>al alcance<br>de todos.</h1>
 
-        <p>Atención médica especializada en las sedes de Antigua Guatemala y Petén. Reserve su cita en segundos.</p>
+        <p>Atención médica especializada en las sedes de Antigua Guatemala y Petén. Reserve su cita en minutos.</p>
 
         <a href="portal.html" class="btn-portal">
             Soy Paciente — Agendar Cita
@@ -496,7 +502,7 @@
             </form>
 
             <div class="form-footer">
-                <p>Sistema de Gestión — Clínica Médica Integral</p>
+                <p>Sistema de Gestión — Clínica Privada</p>
                 <div class="sedes">
                     <span class="sede-tag">Antigua Guatemala</span>
                     <span class="sede-tag">Flores, Petén</span>

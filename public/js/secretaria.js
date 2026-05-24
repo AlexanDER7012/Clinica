@@ -1,7 +1,9 @@
+import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
 import { verificarSesion, initLogout }                        from './menuAuth.js';
 import { initCitasModule, cargarModuloCitas }                 from './menuCitas.js';
 import { initFacturacionModule, cargarModuloFacturacion }     from './menuFacturacion.js';
 import { initCalendarioModule, cargarModuloCalendario }       from './menuCalendario.js';
+import { initNotificaciones }                                 from './menuNotificaciones.js';
 import { initHistorialModule }                                 from './menuHistorial.js';
 import { API_URL }                                            from './menuConfig.js';
 
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFacturacionModule();
   initCalendarioModule();
   initHistorialModule();
+  initNotificaciones();
   initLogout();
 
   cargarModuloCitas();
