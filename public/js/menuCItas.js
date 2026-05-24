@@ -1,9 +1,4 @@
 import { toastExito, toastError, toastAlerta, toastInfo } from './menuToast.js';
-/* ══════════════════════════════════════
-   js/menuCitas.js
-   Módulo de Gestión de Citas — Panel Secretaria
-══════════════════════════════════════ */
-
 import { API_URL } from './menuConfig.js';
 
 const estadoCitas = {
