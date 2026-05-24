@@ -1,4 +1,6 @@
-export const API_URL = 'http://localhost:3000';
+export const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000'
+  : 'https://clinica-medica-rpgg.onrender.com';
 
 export const DATA = {
   visitasMensuales: [30, 45, 35, 60, 50, 70, 55, 80, 65, 75, 60, 85],
