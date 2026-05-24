@@ -38,9 +38,9 @@ app.use("/pacientes", pacientes);
 app.use("/doctores", doctores);
 app.use("/sedes", sedes);
 app.use("/especialidades", especialidades);
-app.use("/usuarios",usuarios);
-app.use("/citas",citas);
-app.use("/auth",auth);
+app.use("/usuarios", usuarios);
+app.use("/citas", citas);
+app.use("/auth", auth);
 app.use("/facturas", facturas);
 app.use("/reportes", reportes);
 app.use("/auditoria", auditoria);
@@ -48,7 +48,7 @@ app.use("/correo", correo);
 app.use("/historial", historial);
 app.use("/documentos", documentos);
 
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
     res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
