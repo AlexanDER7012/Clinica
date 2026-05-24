@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://clinica-medica-rpgg.onrender.com';
 
 const urlParams    = new URLSearchParams(window.location.search);
 const sedeActualId = urlParams.get('sedeId');

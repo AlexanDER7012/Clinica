@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://clinica-medica-rpgg.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
