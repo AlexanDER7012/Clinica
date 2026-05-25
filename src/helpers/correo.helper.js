@@ -12,7 +12,7 @@ function templatePendiente(cita) {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
         <div style="background: #1a365d; padding: 24px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 1.4rem;">Clínica Médica Integral</h1>
+          <h1 style="color: white; margin: 0; font-size: 1.4rem;">Clínica Privada</h1>
           <p style="color: #90cdf4; margin: 6px 0 0;">Sistema de Gestión de Citas</p>
         </div>
 
@@ -37,14 +37,14 @@ function templatePendiente(cita) {
           </div>
 
           <p style="color: #718096; font-size: 0.85rem; margin-top: 24px;">
-            Este correo fue enviado por el sistema de gestión de la Clínica Médica Integral.<br/>
+            Este correo fue enviado por el sistema de gestión de la Clínica Privada.<br/>
             Por favor no responda directamente a este correo.
           </p>
         </div>
 
         <div style="background: #f8fafc; padding: 16px; text-align: center; border-top: 1px solid #e2e8f0;">
           <p style="color: #a0aec0; font-size: 0.8rem; margin: 0;">
-            Clínica Médica Integral — Antigua Guatemala & Petén
+            Clínica Privada — Antigua Guatemala & Petén
           </p>
         </div>
       </div>
@@ -62,7 +62,7 @@ function templateConfirmada(cita) {
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
         <div style="background: #1a365d; padding: 24px; text-align: center;">
-          <h1 style="color: white; margin: 0; font-size: 1.4rem;">Clínica Médica Integral</h1>
+          <h1 style="color: white; margin: 0; font-size: 1.4rem;">Clínica Privada</h1>
           <p style="color: #90cdf4; margin: 6px 0 0;">Sistema de Gestión de Citas</p>
         </div>
 
@@ -91,14 +91,14 @@ function templateConfirmada(cita) {
           </div>
 
           <p style="color: #718096; font-size: 0.85rem; margin-top: 24px;">
-            Este correo fue enviado por el sistema de gestión de la Clínica Médica Integral.<br/>
+            Este correo fue enviado por el sistema de gestión de la Clínica Privada.<br/>
             Por favor no responda directamente a este correo.
           </p>
         </div>
 
         <div style="background: #f8fafc; padding: 16px; text-align: center; border-top: 1px solid #e2e8f0;">
           <p style="color: #a0aec0; font-size: 0.8rem; margin: 0;">
-            Clínica Médica Integral — Antigua Guatemala & Petén
+            Clínica Privada — Antigua Guatemala & Petén
           </p>
         </div>
       </div>
